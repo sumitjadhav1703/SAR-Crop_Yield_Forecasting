@@ -1,0 +1,25 @@
+# ANRF AISEHack 2.0 Round 3 — Sokhda kharif 2025 yield forecast
+#
+# Versions are the ones the shipped run in `logs/pipeline_clean.log` was produced with,
+# on Python 3.14.7. Lower bounds are stated where the code genuinely requires a feature;
+# upper bounds only where an API is known to break.
+#
+# GDAL is NOT installable from this file. It needs the system library first:
+#   macOS    brew install gdal          # then: pip install "gdal==$(gdal-config --version)"
+#   Debian   apt-get install -y gdal-bin libgdal-dev python3-gdal
+#   conda    conda install -c conda-forge gdal
+# The pipeline was run against GDAL 3.13.2 locally and GDAL 3.8.4 on Kaggle, and reproduces
+# on both — see AGENTS.md S20. `farm_features._ogr_mem_driver` handles the 3.11 rename of the
+# OGR in-memory driver ("Memory" -> "MEM"), which is the only version-sensitive GDAL call.
+
+numpy==2.4.4          # >=2.0 for np.trapezoid; the code carries a np.trapz fallback below that
+pandas==2.3.3         # >=2.2,<3.0 — yield_forecast.label_sensitivity uses include_groups=False
+scipy==1.17.1
+scikit-learn==1.8.0   # KMeans only, seeded with crop_type.RANDOM_STATE
+matplotlib==3.11.1    # >=3.9 — figures use boxplot(tick_labels=), renamed from labels=
+
+# Deck only. Not needed to run the pipeline or the tests.
+python-pptx==1.0.2
+
+# Tests.
+pytest==8.4.2

@@ -1,0 +1,41 @@
+# ---------------------------------------------------------------------------
+# COMPETITION DATA AND EVERYTHING DERIVED FROM IT.
+#
+# The ANRF AISEHack 2.0 rules make the Competition Data "Competition Use only":
+# it may not be transmitted, duplicated, published or redistributed to anyone
+# not participating. That covers the raw SLCs and it covers processed copies of
+# them, so `work/gamma0/` — 656 MB of calibrated, geocoded gamma-nought over the
+# AOI — is squarely out. So are the intermediate farm tables, which carry
+# per-plot centroids taken from the competition shapefile.
+#
+# The three tables in `outputs/` are safe and ARE published: they are this
+# project's own model output and were checked to hold no coordinate column.
+# See README.md for where a reader gets the data themselves.
+# ---------------------------------------------------------------------------
+Data/
+work/
+
+# ---------------------------------------------------------------------------
+# Environment. `.venv` here is a --system-site-packages shell over Homebrew
+# Python and is not portable to another machine even if it were committed;
+# requirements.txt is the reproducible statement.
+# ---------------------------------------------------------------------------
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.DS_Store
+
+# ---------------------------------------------------------------------------
+# Logs. `pipeline_clean.log` is the shipped run that every number in the
+# write-up is traced to, and `writeup_trace.txt` is the token-to-line mapping
+# that proves it — both are committed. The rest are development scratch from
+# individual sessions, and shipping several pipeline logs with nothing saying
+# which is current is worse than shipping one.
+# ---------------------------------------------------------------------------
+logs/*
+!logs/pipeline_clean.log
+!logs/writeup_trace.txt
+
+# Session scratch, not part of the submission.
+NEXT_SESSION.md

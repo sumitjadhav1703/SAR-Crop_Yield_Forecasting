@@ -1,0 +1,748 @@
+
+==============================================================================
+PHASE 1  calibration, geocoding, co-registration  (6 scenes)
+==============================================================================
+[T1 20250606] calibrating 4682x27192 SLC ...
+[T1 20250606] theta=35.24 deg, focusing surface h=-21.53 m, geocoding at fitted h=-17.15 m, shift=(0.0, 0.0) -> gamma0_lin_T1_20250606.tif
+[T2 20250619] calibrating 3910x27187 SLC ...
+[T2 20250619] theta=28.77 deg, focusing surface h=-21.53 m, geocoding at fitted h=-17.61 m, shift=(4.29, -2.57) -> gamma0_lin_T2_20250619.tif
+[T3 20250814] calibrating 3897x27219 SLC ...
+[T3 20250814] theta=28.69 deg, focusing surface h=-21.53 m, geocoding at fitted h=-17.62 m, shift=(0.85, -1.18) -> gamma0_lin_T3_20250814.tif
+[T4 20251013] calibrating 4244x27241 SLC ...
+[T4 20251013] theta=31.53 deg, focusing surface h=-21.53 m, geocoding at fitted h=-17.41 m, shift=(1.22, -0.96) -> gamma0_lin_T4_20251013.tif
+[T5 20251029] calibrating 4050x27285 SLC ...
+[T5 20251029] theta=29.84 deg, focusing surface h=-21.53 m, geocoding at fitted h=-16.73 m, shift=(0.0, 0.0) -> gamma0_lin_T5_20251029.tif
+[T6 20251112] calibrating 4031x27273 SLC ...
+[T6 20251112] theta=29.75 deg, focusing surface h=-21.53 m, geocoding at fitted h=-17.54 m, shift=(1.18, -1.17) -> gamma0_lin_T6_20251112.tif
+
+fitted terrain heights, six scenes at five incidence angles: mean -17.34 m, spread 0.89 m, std 0.32 m
+
+==============================================================================
+PHASE 1 GATES  (blocking)
+==============================================================================
+G1  footprint agreement with vendor geocoded preview
+    T1  valid= 79.6%  vendor= 79.4%  IoU=0.9984  ours-only=0.160%  [PASS]
+    T2  valid= 78.5%  vendor= 78.5%  IoU=0.9964  ours-only=0.215%  [PASS]
+    T3  valid= 78.6%  vendor= 78.5%  IoU=0.9980  ours-only=0.127%  [PASS]
+    T4  valid= 78.8%  vendor= 78.9%  IoU=0.9992  ours-only=0.015%  [PASS]
+    T5  valid= 73.6%  vendor= 73.8%  IoU=0.9980  ours-only=0.000%  [PASS]
+    T6  valid= 78.4%  vendor= 78.2%  IoU=0.9978  ours-only=0.220%  [PASS]
+G2  co-registration (tolerance 2 m)
+    absolute anchoring — master against the vendor's geocoded product
+      T1 vs vendor preview  dy=+0.12 dx=+0.13 px  |d|=0.18 m  [PASS]
+    stack consistency — every date against the master (drives temporal features)
+    gated over FARM_WINDOW (308300.0, 2478950.0, 312950.0, 2483100.0), the ground the 966 plots sit on;
+    the full-AOI figure follows each line as a diagnostic, not as the gate
+      T2 vs T1   over the farms dy=-0.03 dx=+0.22 px  |d|=0.23 m  peak=0.00965  [PASS]   full AOI |d|= 0.19 m  peak=0.00811
+      T3 vs T1   over the farms dy=+0.05 dx=+0.02 px  |d|=0.06 m  peak=0.00717  [PASS]   full AOI |d|= 0.08 m  peak=0.00611
+      T4 vs T1   over the farms dy=+0.06 dx=+0.01 px  |d|=0.06 m  peak=0.01029  [PASS]   full AOI |d|= 0.08 m  peak=0.00864
+      T5 vs T1   over the farms dy=+1.09 dx=-1.00 px  |d|=1.48 m  peak=0.00172  [PASS]   full AOI |d|= 1.43 m  peak=0.00147
+      T6 vs T1   over the farms dy=-0.11 dx=-0.05 px  |d|=0.13 m  peak=0.00575  [PASS]   full AOI |d|= 0.12 m  peak=0.00463
+    vendor's own inter-date disagreement, for the record (not a gate)
+      preview T2 vs preview T1   |d|=4.29 m
+      preview T3 vs preview T1   |d|=0.24 m
+      preview T4 vs preview T1   |d|=1.02 m
+      preview T5 vs preview T1   |d|=7.14 m
+      preview T6 vs preview T1   |d|=1.00 m
+G3  radiometric plausibility
+    T1  median=-21.52 dB   max= 27.0 dB [PASS]   NESZ=-26.13 dB, margin= 4.6 dB [PASS]   CoV=1.01 ENL=0.98  22.8% below NESZ
+    T2  median=-19.85 dB   max= 28.3 dB [PASS]   NESZ=-27.76 dB, margin= 7.9 dB [PASS]   CoV=0.99 ENL=1.02  12.1% below NESZ
+    T3  median=-21.63 dB   max= 29.6 dB [PASS]   NESZ=-27.97 dB, margin= 6.3 dB [PASS]   CoV=1.03 ENL=0.94  17.1% below NESZ
+    T4  median=-21.31 dB   max= 26.6 dB [PASS]   NESZ=-27.35 dB, margin= 6.0 dB [PASS]   CoV=1.02 ENL=0.96  17.5% below NESZ
+    T5  median=-20.34 dB   max= 27.4 dB [PASS]   NESZ=-27.74 dB, margin= 7.4 dB [PASS]   CoV=0.98 ENL=1.04  12.5% below NESZ
+    T6  median=-24.10 dB   max= 18.4 dB [PASS]   NESZ=-27.72 dB, margin= 3.6 dB [PASS]   CoV=1.07 ENL=0.88  29.4% below NESZ
+    all 6 geocoded products are distinct rasters (count/sum/sum-of-squares fingerprint) [PASS]
+    cross-date AOI-median spread = 4.26 dB. NOT a gate: this is vegetation and surface moisture,
+    and over a stack that now runs past harvest it is supposed to move. The calibration gate is in scene_diagnostics.
+
+Phase 1 gates: ALL PASS
+
+==============================================================================
+PHASE 2  scene-level bare-soil drift, measured off non-farm ground
+==============================================================================
+co-valid mask: 72.2 % of the AOI is measured on all six dates. Every number below is computed on that mask only.
+invariant targets: 314 of 313161 8 m blocks, the top 0.1 % of min(T1, T2, T3).
+T4, T6 and T5 take no part in the selection, so they are scored on targets they did not help choose.
+
+  code  look    incid   invariant dB   offset dB   corrected dB   AOI median   role
+  (* = applied; offsets under 2.0 dB are measured, printed and left alone)
+  T1    left   35.2          -8.98 +0.00           -8.98       -21.44   selection
+  T2    left   28.8          -7.06 -1.70           -7.06       -19.76   selection
+  T3    left   28.7          -8.21 -0.32           -8.21       -21.58   selection
+  T4    left   31.5          -8.22 +0.29           -8.22       -21.30   HELD OUT
+  T5    right  29.8         -17.65     —               —       -20.34   not consulted
+  T6    left   29.7         -12.23 +4.28*          -7.95       -24.03   HELD OUT
+
+  held-out left-looking dates: 4.01 dB apart before the offsets, 0.27 dB after [PASS, tolerance 1.5 dB]
+  That is the calibration statement, and it is made on targets with no crop calendar. The AOI median is NOT a calibration
+  statistic: it is vegetation and surface moisture, and it is supposed to move.
+
+  is the residual a scene-wide offset or a surface change? median (T1 - date) by decile of min(T1,T2,T3):
+    decile brightness dB      n      T6      T5      T4
+       -29.2..  -23.1    31316   +1.97   -3.54   +0.26
+       -23.1..  -22.4    31316   +1.89   -3.07   -0.47
+       -22.4..  -21.8    31316   +1.99   -2.60   -0.52
+       -21.8..  -21.4    31316   +2.12   -2.14   -0.48
+       -21.4..  -21.0    31316   +2.30   -1.65   -0.34
+       -21.0..  -20.5    31316   +2.43   -1.14   -0.23
+       -20.5..  -20.0    31315   +2.63   -0.47   -0.08
+       -20.0..  -19.3    31317   +2.82   +0.29   +0.07
+       -19.3..  -18.1    31316   +3.13   +1.36   +0.30
+       -18.1..   10.4    31317   +3.71   +2.31   +0.40
+    T6 is flat: the same deficit on the darkest fields and on the built-up tail. Harvest cannot do that -- it darkens
+    fields and leaves buildings alone -- so it is a scene-wide radiometric bias and a single constant removes it.
+    T5 is not flat, and it changes sign. Rough dark surfaces read BRIGHTER (63 mm of rain in the three days before
+    the pass) while built-up reads far darker (the reversed look direction extinguishes the wall-ground dihedrals).
+    Two mechanisms with opposite signs: no constant can undo it, so T5's level is never used and only its timing is.
+
+  T5 is 5.4 dB below the dimmest left-looking date on the invariant targets.
+
+  the AOI median against the two things that actually move it:
+    code   AOI median dB   API14 mm   reading
+    T1          -21.44       26.5   pre-monsoon, bare to sparse
+    T2          -19.76       86.9   monsoon onset, wet soil, crop barely emerged
+    T3          -21.58        5.1   mid-monsoon dry spell, full canopy
+    T4          -21.30       11.9   post-monsoon, canopy senescing
+    T5          -20.34       53.1   post-rain and pre-dawn, right-looking
+    T6          -24.03       12.2   dry, and most of the crop is off the field
+    T2 is the brightest and the wettest. T3 is the driest pass in the stack and still sits 2.4 dB above T6, which is
+    drier only in soil -- the difference is the canopy T3 has and T6 does not.
+
+wrote /Users/sumitjadhav/Hackathon/Round 3/work/scene_offsets.json
+
+==============================================================================
+PHASE 2b  farm-level features, six dates
+==============================================================================
+966 farms; data quality: measured=813, interpolated=82, imputed=71
+153 of 966 plots are not fully observed on all six dates (15.8 %)
+
+==============================================================================
+SENTINEL-2  same-day optical, plus two reserved dates  [NETWORK]
+==============================================================================
+T4  candidate dates in 2025-10-11T00:00:00Z/2025-10-15T23:59:59Z:
+    2025-10-13  2 tile(s) 43QBE+43QCE  tile cloud   0.1%
+    2025-10-13: AOI SCL-valid 100.0%; farms with >=60% valid core 956/966
+    -> using 2025-10-13
+T6  candidate dates in 2025-11-10T00:00:00Z/2025-11-14T23:59:59Z:
+    2025-11-12  2 tile(s) 43QCE+43QBE  tile cloud   0.0%
+    2025-11-12: AOI SCL-valid 100.0%; farms with >=60% valid core 956/966
+    -> using 2025-11-12
+T5  candidate dates in 2025-10-26T00:00:00Z/2025-11-01T23:59:59Z:
+    2025-10-28  2 tile(s) 43QCE+43QBE  tile cloud  79.1%
+    2025-10-28: AOI SCL-valid 0.0%; farms with >=60% valid core 0/966
+    -> NO T5 DATE CLEARS 80% AOI VALIDITY; the T5 control is unavailable and is reported as such
+T1  candidate dates in 2025-06-04T00:00:00Z/2025-06-12T23:59:59Z:
+    2025-06-10  2 tile(s) 43QBE+43QCE  tile cloud  23.6%
+    2025-06-05  2 tile(s) 43QBE+43QCE  tile cloud  42.8%
+    2025-06-10: AOI SCL-valid 100.0%; farms with >=60% valid core 956/966
+    -> using 2025-06-10
+R1  candidate dates in 2025-12-08T00:00:00Z/2025-12-14T23:59:59Z:
+    2025-12-12  2 tile(s) 43QCE+43QBE  tile cloud   0.0%
+    2025-12-12: AOI SCL-valid 100.0%; farms with >=60% valid core 956/966
+    -> using 2025-12-12
+R2  candidate dates in 2026-01-08T00:00:00Z/2026-01-18T23:59:59Z:
+    2026-01-16  2 tile(s) 43QCE+43QBE  tile cloud   0.0%
+    2026-01-11  2 tile(s) 43QCE+43QBE  tile cloud   0.0%
+    2026-01-08  2 tile(s) 43QCE+43QBE  tile cloud   0.0%
+    2026-01-16: AOI SCL-valid 100.0%; farms with >=60% valid core 956/966
+    -> using 2026-01-16
+
+==============================================================================
+PHASE 3  phenology: departures, season integral, cleared fraction
+==============================================================================
+bare-soil drift, measured off 16473273 AOI pixels that belong to no farm polygon and are not built-up
+  date   level dB   drift vs T1 dB
+  T1     -21.51           +0.00
+  T2     -19.97           +1.53
+  T3     -21.65           -0.14
+  T4     -21.44           +0.06
+  T6     -19.86           +1.65
+  This is the part of every plot's change that the whole district shares, and it is removed before any plot is
+  compared with any other. What is left is the plot's own canopy.
+
+per-plot canopy signal: clip(departure, 0), on the sign measured against Sentinel-2 (see canopy_sign.py)
+  peak canopy     median  0.77 dB   p10  0.00   p90  2.26
+  peak DOY        median   286   (T3:134 T4:302 T6:152)
+  canopy at T6    median  0.00 dB
+  season integral median  0.08 dB (signed mean departure over DOY 226-316)
+
+  plots with a canopy episode above 0.5 dB: 588  (60.9 %); below it 378
+  cleared fraction by 12 Nov   median 0.63   p10 0.00   p90 1.00
+    mostly cleared (>0.8)   238     barely cleared (<0.2)   193
+  No per-plot harvest DATE is reported. Three canopy samples with a sixty-day gap across September
+  cannot locate a transition, and the date this module used to emit failed the optical test that
+  the continuous cleared fraction passes. See the module docstring.
+
+==============================================================================
+CANOPY SIGN  pre-registered optical arbitration
+==============================================================================
+plots with measured SAR and >=90% optical coverage on both decisive dates: 813 of 966
+S2 dates: 2025-10-13 (Capella T4 13 Oct) and 2025-11-12 (Capella T6 12 Nov)
+
+1. Same-day correlation of departure against NDVI
+   (a static field property would also produce this, hence the control row)
+   same-day T4                            n= 813  rho=+0.630  p=4.88e-91
+   same-day T6                            n= 813  rho=+0.454  p=1.32e-42
+   cross-date T3 vs NDVI T4 (control)     n= 813  rho=+0.358  p=5.43e-26
+
+2. DIFFERENCED, T6 minus T4 on both instruments -- the decisive test
+   crop         n     rho        p        dB per NDVI unit   pre-registered
+   ALL          813  +0.569   8.11e-71     +4.93           mixed
+   Rice         107  +0.551   7.98e-10     +7.84           +  AGREES
+   Cotton        92  +0.569   3.26e-09     +4.01           -  CONTRADICTS
+   Maize        251  +0.647   3.21e-31     +3.74           -  CONTRADICTS
+   Bajra        142  +0.334   4.93e-05     +1.90           -  CONTRADICTS
+   Groundnut    221  +0.705   1.58e-34     +5.04           -  CONTRADICTS
+
+3. The season integral: the shipped form against the two alternatives
+   all three scored against the same reference: mean NDVI of the two optical dates
+   observed_integral (SIGNED, shipped)  rho=+0.564  p= 1.54e-69  n=813
+   same integral clipped at zero        rho=+0.472  p= 2.47e-46  n=813
+   same integral on |departure|         rho=-0.085  p= 1.49e-02  n=813
+   The signed form wins and the sign-agnostic form is empty. Stated plainly because
+   it cuts both ways: the shipped form was CHOSEN on these scores, so 13 Oct and
+   12 Nov cannot also validate the integral. That is what the two reserved scenes
+   are for. The row labelled `(clip>=0)` here until 2026-08-31 was the signed
+   integral mislabelled -- see AGENTS.md S23a.
+
+4. Clearing by 12 November against the optical change, in quintiles
+   quintile    n   cleared   NDVI 13 Oct  NDVI 12 Nov   change
+       1      192     0.00       0.430        0.578   +0.101
+       2       95     0.62       0.615        0.604   +0.005
+       3      192     1.00       0.585        0.502   -0.034
+   overall rho=-0.529 (n=479, p=6.85e-36); expected negative, and it is
+
+5. t5_anomaly against the optical change: rho=-0.186 (n=813, p=9.75e-08)
+   t5_anomaly against NDVI on 13 Oct:      rho=-0.007 (n=813, p=8.31e-01)
+   The soil-exposure reading of t5_anomaly predicts both negative.
+
+6. Does the X-band departure saturate against NDVI? (the standing criticism of
+   X-band for crop work: a 3 cm wave saturates early with crop parameters)
+   bin      n   NDVI range      NDVI mean   departure dB   dB per NDVI unit
+     1    136   0.223-0.334       0.288         -1.328           -
+     2    135   0.334-0.396       0.364         -0.350      +12.89
+     3    135   0.396-0.455       0.426         -0.051       +4.85
+     4    136   0.455-0.555       0.504         +0.188       +3.07
+     5    135   0.555-0.646       0.605         +1.054       +8.56
+     6    136   0.646-0.824       0.701         +1.452       +4.15
+   departure runs -1.33 to +1.45 dB and is MONOTONE INCREASING across all 6 bins;
+   the increment is +3.07 to +12.89 dB per NDVI unit and ends at +4.15,
+   so it does not collapse toward zero at the top. Over the NDVI range these
+   fields actually occupy, the response does NOT saturate. That is the measured
+   answer to the standing X-band criticism, and it is a bounded answer: the top
+   bin averages NDVI 0.70, so this says nothing about
+   biomass beyond what Sokhda grew. A compressed top end would have bounded the
+   RANKING's dynamic range rather than inverted it -- the model claims a
+   within-cohort rank on an external level, not a biomass retrieval.
+
+==============================================================================
+PHASE 4  crop type, six dates
+==============================================================================
+966 farms; non-crop screen removed 51 (34.3 ha, 7.7%) before clustering
+9 clusters over 20 seeds on the remaining 915
+silhouette = 0.188   consensus stability: median 0.84
+
+cluster -> label, with the z-scored descriptors that decided it
+  tier 1 = the threshold rules fired; tier 2 = allocated, radar cannot separate
+  cl tier  label        n     ha    level_T3       d23       d34   curv234  range234    cov_T3       d46canopy_end_dbobserved_integral
+  0   2    Bajra/Groundnut/Maize 159   81.3       -0.38     -0.32     -0.17      0.07     -0.06     -0.32      0.51     -0.64     -0.74
+  1   2    Bajra/Cotton/Groundnut/Maize 155   51.2       -0.71      0.55      0.17     -0.20     -1.09     -0.24      0.67      0.62      0.57
+  2   1    Cotton        43   34.5       -0.79     -0.53      1.64      1.29      0.62     -0.29      0.55      2.65      1.44
+  3   2    Bajra/Groundnut/Maize   7    7.3       -0.23     -0.56     -0.16      0.21      0.37      2.78      0.25     -0.52     -0.59
+  4   1    Rice          67   48.2        2.17      1.54     -0.64     -1.24     -1.27     -0.78     -1.91     -0.39      1.06
+  5   2    Bajra/Groundnut/Maize 174   75.9       -0.80     -0.50      0.93      0.85      0.03     -0.09     -0.90     -0.44      0.10
+  6   1    Rice          44   27.7        1.40      0.94     -2.20     -1.86      0.98     -0.45      0.83     -0.51     -1.11
+  7   2    Bajra/Cotton/Groundnut/Maize 124   71.7       -0.61     -1.95      0.18      1.19      1.74     -0.26      1.18     -0.39     -1.61
+  8   2    Bajra/Groundnut/Maize 193   49.7       -0.03      0.83      0.26     -0.30     -1.30     -0.35     -1.17     -0.38      0.87
+  best phenology fit per cluster, for the record (not used to assign):
+              Rice     Cotton      Maize      Bajra  Groundnut
+    0        -0.51      -0.20      -0.27       0.26       0.28
+    1        -0.44       0.25       0.01      -0.50       1.27
+    2        -1.60       1.12      -1.11      -1.09      -0.19
+    3        -0.52      -0.24      -0.36       0.41      -0.16
+    4         3.29      -0.14       1.67      -0.64       0.09
+    5        -1.38       0.59      -0.93      -0.68       0.40
+    6         2.62      -1.46       2.11       2.28      -1.73
+    7        -1.84      -0.29      -1.41       0.87      -1.10
+    8         0.39       0.38       0.29      -0.90       1.15
+
+confidence tiers:
+  high 170 farms   118.5 ha  26.5%  (Cotton, Rice)
+  low  796 farms   329.1 ha  73.5%  (Bajra, Cotton, Groundnut, Maize, Rice)
+
+absolute gamma0 (dB) by crop and date — the physical trajectory:
+  crop               T1       T2       T3       T4       T6      d23      d34
+  Rice           -18.22   -16.73   -16.88   -18.47   -17.71    -0.15    -1.58
+  Cotton         -21.01   -18.73   -21.14   -18.85   -16.73    -2.41     2.29
+  Maize          -20.21   -18.37   -20.75   -19.95   -18.72    -2.38     0.80
+  Bajra          -19.76   -15.35   -20.52   -20.04   -18.97    -5.17     0.48
+  Groundnut      -20.72   -19.33   -20.88   -19.85   -18.34    -1.55     1.03
+
+crop mix (area share). Rice/Cotton are measured; the other three are the
+district mix applied to the residual, so their agreement is by construction:
+  Rice       111 farms    76.0 ha  17.0%  (district 26%)  measured
+  Cotton      62 farms    45.5 ha  10.2%  (district 32%)  measured
+  Maize      313 farms   139.6 ha  31.2%  (district 18%)  allocated
+  Bajra      139 farms    61.8 ha  13.8%  (district 8%)  allocated
+  Groundnut  341 farms   124.7 ha  27.9%  (district 16%)  allocated
+
+separability — is the clustering resolving real structure?
+  between-crop spread in peak-canopy gamma0 : 4.26 dB
+  farm-level speckle noise, median N=2115 px : 0.094 dB
+  low-confidence farms (margin < 0.05) : 126
+  dark-flood rice rule, min(T1,T2)->T3 rise : -0.32 dB median (needs +6 dB) — not usable
+
+tier-2 ordering — how much of the allocation is decided by tied keys? (S14)
+  the clipped axis this one replaced tied 403 of 793 allocated plots on one value
+  (183.0 ha), and the cut fell inside that block. departure_T6 separates the same
+  plots across 392 distinct values.
+  axis departure_T6: 49 of 793 allocated plots still share an exact value
+  with another (5.9 of 326.1 ha; largest tied run 10 plots)
+  cohort area over 200 permutations of the tie order, ha:
+    Bajra       61.82 –  61.82   (shipped  61.82)
+    Maize      139.62 – 139.62   (shipped 139.62)
+    Groundnut  124.67 – 124.67   (shipped 124.67)
+  pre-registered prediction 1: the tier-2 cohorts separate better on optical NDVI residualised
+    against the ranking axis than the clipped axis managed (eta2_resid 0.0274, F 10.30) — scored in
+    the SENTINEL-2 VALIDATION block below, not here.
+  pre-registered prediction 2: t5_anomaly (soil exposure on 29 Oct, in no label) orders
+    Bajra > Maize > Groundnut most-exposed first. Measured medians, dB: Rice +0.58, Cotton +0.44, Maize +0.82, Bajra +0.36, Groundnut +0.55
+    observed order Maize > Groundnut > Bajra — CONTRADICTS
+
+stability — does the labelling survive changes to the clustering setup?
+  'tier1' column is the one that matters: it is the part being claimed.
+  n_clusters=9   n_seeds=5   all 97.5%   tier1 100.0% over 167 farms   (high-conf area 118.5 ha vs 118.5)
+  n_clusters=9   n_seeds=40  all 99.5%   tier1 100.0% over 170 farms   (high-conf area 118.5 ha vs 118.5)
+  n_clusters=7   n_seeds=20  all 96.7%   tier1 100.0% over 170 farms   (high-conf area 128.6 ha vs 118.5)
+  n_clusters=11  n_seeds=20  all 84.1%   tier1 100.0% over 145 farms   (high-conf area 150.0 ha vs 118.5)
+
+sensitivity of the cotton area to COTTON_NOV_DB:
+ cotton_nov_db  plots   area_ha  area_share
+           1.0    132 79.161263    0.176881
+           1.5     57 39.319239    0.087856
+           2.0     36 28.749213    0.064238
+
+==============================================================================
+SENTINEL-2 VALIDATION  against the labels it never entered
+==============================================================================
+
+=== no same-window reserved scene; Round 3 reserves 12 Dec and 16 Jan ===
+  Those two are scored in `validate.report`, not here. They sit outside the
+  kharif window on purpose, which is what makes them independent and also
+  what limits what they can test.
+  The 13 Oct correlation below is then a DIAGNOSTIC, not a held-out test:
+  that scene set BIOMASS_SIGN and the tier-2 ranking axis. Stated outcome.
+
+=== scattering regime, on 905 crop farms with clean optical ===
+Sentinel-2 13 Oct 2025 vs Capella 13 Oct 2025 — same day, independent sensors.
+  corr(NDVI 13 Oct, gamma0 T4 (13 Oct)    ) = +0.514 pearson, +0.508 spearman
+  corr(NDVI 13 Oct, gamma0 T3 (14 Aug)    ) = +0.174 pearson, +0.159 spearman
+  corr(NDVI 13 Oct, gamma0 T2 (19 Jun)    ) = -0.173 pearson, -0.225 spearman
+  corr(NDVI 13 Oct, d34 = T4 - T3         ) = +0.309 pearson, +0.260 spearman
+  corr(NDVI 13 Oct, within-field CoV T4   ) = -0.119 pearson, -0.139 spearman
+
+NDVI on 13 Oct by SAR crop label (still-green crops score high):
+  crop        n   NDVI_T4   g0_T4    g0_T3     d34
+  Bajra      115    0.442  -20.21  -20.62    0.41
+  Cotton      61    0.472  -18.93  -21.24    2.31
+  Groundnut  322    0.516  -20.00  -21.03    1.03
+  Maize      298    0.491  -20.01  -20.86    0.85
+  Rice       109    0.500  -18.45  -16.82   -1.63
+  tier-2 cohorts differ in NDVI: Kruskal-Wallis H = 24.3, p = 5.2e-06  (ordering only — see the residualised test below)
+
+gamma0 by NDVI quintile on 13 Oct — the regime test, free of any crop label:
+  quintile  n   NDVI    g0_T4   g0_T3     d34
+    Q1     181  0.305  -20.74  -20.46   -0.28
+    Q2     181  0.395  -20.24  -20.93    0.68
+    Q3     181  0.479  -19.90  -20.73    0.83
+    Q4     181  0.592  -19.33  -20.38    1.05
+    Q5     181  0.697  -18.65  -19.65    1.01
+
+=== is the October correlation vegetation, or a static field property? ===
+905 farms with clean optical on both 10 Jun and 13 Oct.
+A time-invariant property -- surface roughness, tillage, drainage, parcel geometry --
+would correlate with gamma0 on *any* pairing of dates. Vegetation would not.
+
+  same-date pairs (the relationship replicates at a different season):
+    corr(NDVI 10 Jun, gamma0  6 Jun)  = +0.531
+    corr(NDVI 13 Oct, gamma0 13 Oct)  = +0.514
+
+  cross-date pairs (a static property would keep these positive too):
+    corr(NDVI 13 Oct, gamma0  6 Jun)  = +0.089
+    corr(NDVI 13 Oct, gamma0 19 Jun)  = -0.173
+    corr(NDVI 10 Jun, gamma0 13 Oct)  = +0.179
+
+  DIFFERENCED — every time-invariant field property cancels:
+    corr(dNDVI, dgamma0) = +0.654 pearson, +0.586 spearman;  slope +5.74 dB per NDVI unit
+
+  Verdict: same-date pairs are strongly positive and cross-date pairs are not,
+  and the differenced relationship is the strongest of all. The sign is vegetation.
+
+  NOTE: this control was originally written expecting June to be nearly bare, so
+  that a strong June correlation would indicate a soil artefact. June NDVI averages
+  0.404 here, so that premise was false and the test as first framed did
+  not measure what it claimed. The cross-date and differenced pairs above are the
+  controls that actually separate vegetation from a static field property.
+
+do the crop labels carry information beyond the axis that assigned them?
+one-way ANOVA on NDVI residualised against each candidate axis. The FIRST row per
+tier is the live ranking axis, `departure_T6`; the second is
+`g0_db_filled_T4`, which this test residualised against by mistake from S15 until
+2026-08-31 and is kept so the pre-registered 0.0274 baseline stays comparable.
+  tier              axis                n   eta2 raw  eta2 resid        F          p
+  2 (allocated)  departure_T6         735     0.0335     0.00231     0.847   4.29e-01
+  2 (allocated)  g0_db_filled_T4      735     0.0335     0.03017    11.387   1.35e-05
+  1 (control)    departure_T6         170     0.0071     0.04605     8.109   4.95e-03
+  1 (control)    g0_db_filled_T4      170     0.0071     0.00009     0.015   9.03e-01
+  tier 1 must pass, or the test is not sensitive enough to trust when tier 2 fails
+
+  PRE-REGISTERED PREDICTION 1 (crop_type.TIER2_PREREGISTERED), scored:
+    like-for-like, residualised against g0_db_filled_T4 as the 0.0274 baseline
+    was: eta2_resid 0.03017 vs 0.0274, F 11.387 vs 10.30, p 1.35e-05  -- CONFIRMED
+    corrected, residualised against the live ranking axis `departure_T6`:
+    eta2_resid 0.00231, F 0.847, p 4.29e-01  -- this is the test the
+    prediction intended. No pre-registered threshold exists for it, because the
+    threshold was set on the mis-specified test, so it is reported and not scored.
+
+==============================================================================
+PHASE 5  season context and the reference yield
+==============================================================================
+kharif 2025 rainfall at Sokhda (NASA POWER PRECTOTCORR, Jun-Nov)
+  2025 season total          1098.5 mm
+  1995-2024 mean               923.1 mm (median 905.8, sd 266.6)
+  anomaly                     119.0 % of mean, z = +0.66
+  A wet year, comfortably inside the historical range -- not a drought year and not a flood year.
+
+surface wetness at each acquisition (mm, and the 14-day decayed index)
+  code  date      hh:mm  look    rain_d0  prev3d  prev7d   API14
+  T1    20250606  12:55  left       0.0    10.1    24.5    26.5
+  T2    20250619  07:44  left      21.9    87.5   115.3    86.9
+  T3    20250814  08:41  left       1.4     2.4     3.3     5.1
+  T4    20251013  07:57  left       0.0     0.0    11.3    11.9
+  T5    20251029  01:37  right      0.7    63.1    64.3    53.1
+  T6    20251112  19:22  left       0.0     0.0     0.0    12.2
+  wettest pass: T2 (API 86.9), driest: T3 (API 5.1)
+  T5 is the pre-dawn pass, the right-looking pass, AND the second-wettest pass. All three inflate X-band backscatter in the same direction, so an
+  uncorrected stack reads late October as growth in a season that is ending.
+
+reference yield for kharif 2025-26: Gujarat kharif, kg/ha, DA&FW Directorate of Economics and Statistics,
+five-year table at 3rd Advance Estimates. The four prior seasons are shown so the reader can place 2025-26.
+  crop           2021-22   2022-23   2023-24   2024-25   2025-26   rank/5   vs prior mean   Y_ref used
+  Rice             2304      2496      2449      2362      1675       1          69.7 %        1675  paddy
+  Maize            1950      1906      2013      1474      2035       5         110.9 %        2035  grain
+  Bajra            2442      1775      1776      1844      1362       1          69.5 %        1362  grain
+  Groundnut        2262      2579      2757      2665      2734       4         106.6 %        2734  unshelled pods
+  Cotton            559       602       574       513       551       2          98.0 %        1621  seed cotton (kapas)
+  Cotton is published as lint and converted to seed cotton at a 34% ginning outturn.
+  Rice and bajra recorded their LOWEST yield of the five years and maize its highest. Gujarat kharif 2025 was an
+  excess-rain season, not simply a wet one: the state announced flood relief for Vadodara district after the Narmada
+  overflowed 16-18 September 2025, inside the grain-fill window for paddy. The rainfall anomaly above corroborates
+  the direction; it is deliberately NOT used as a multiplier, because the official estimate already measures the outcome.
+  No Vadodara district uplift is applied, because no district-level 2025-26 estimate is published. Vadodara ranks
+  1st in Gujarat for maize yield and 2nd for cotton, so those two forecasts are conservative by a known sign.
+
+==============================================================================
+PHASE 6  the forecast
+==============================================================================
+final yield forecast for kharif 2025, t/ha, by crop
+  crop         n     ha   Y_ref   mean    p10    p90   extrap  basis
+  Bajra       139   61.8    1.36   1.41   1.20   1.64    0.00  grain
+  Cotton       62   45.5    1.62   1.58   1.19   1.93    0.56  seed cotton (kapas)
+  Groundnut   341  124.7    2.73   2.76   2.19   3.47    0.00  unshelled pods
+  Maize       313  139.6    2.04   2.02   1.50   2.50    0.00  grain
+  Rice        111   76.0    1.68   1.68   1.24   2.11    0.00  paddy
+
+factor centring -- each cohort median must be exactly 1.00, or a typical plot
+drifts below its own state reference before anything has been measured:
+crop_type
+Bajra        1.0
+Cotton       1.0
+Groundnut    1.0
+Maize        1.0
+Rice         1.0
+
+how much of each crop's forecast is projected past 12 November rather than observed
+  crop        mean  p90   plots wholly observed
+  Bajra       0.00  0.00     139 of 139
+  Cotton      0.56  0.75       0 of 62
+  Groundnut   0.00  0.00     341 of 341
+  Maize       0.00  0.00     313 of 313
+  Rice        0.00  0.00     111 of 111
+  Cotton is the only crop whose season extends materially past the stack, and it is the only
+  one carrying a large projected share. Everything else is closed by observation.
+
+village production forecast: 893.9 t over 447.5 ha (2.00 t/ha area-weighted)
+Area-weighted, not plot-averaged: plots span 8.55e-16-3.49 ha (median 0.27). 10 parcels have degenerate geometry (< 1e-6 ha):
+they carry a row, and area weighting is what keeps them from voting.
+
+share of each cohort sitting exactly on its own cohort median, which the centred factor
+cannot rank -- the second reason the integral is signed:
+  variant                   Bajra     Cotton  Groundnut      Maize       Rice
+  signed (shipped)           0.7%       0.0%       0.3%       0.3%       0.9%
+  clipped at zero           80.6%       0.0%       0.3%       0.3%       0.9%
+
+p90-p10 spread within each crop, t/ha -- if this were ~0 the forecast would be five numbers:
+crop_type
+Bajra        0.444
+Cotton       0.745
+Groundnut    1.282
+Maize        0.996
+Rice         0.867
+village production under both label sets -- the same SAR features, the same Y_ref table,
+only the crop label swapped for Round 2's four-date one:
+            n_r3   ha_r3  t_ha_r3    t_r3   n_r2   ha_r2  t_ha_r2    t_r2    d_t
+crop_type                                                                       
+Bajra      139.0   61.82     1.40   86.56  167.0   57.73     1.31   75.85  10.71
+Cotton      62.0   45.46     1.62   73.80  101.0   61.26     1.64  100.68 -26.88
+Groundnut  341.0  124.67     2.66  331.66  296.0  115.83     2.66  308.26  23.41
+Maize      313.0  139.62     1.96  273.74  293.0  130.40     1.98  257.67  16.08
+Rice       111.0   75.97     1.69  128.16  109.0   82.32     1.67  137.85  -9.69
+
+total 893.9 t (Round 3 labels) vs 880.3 t (Round 2 labels): +1.5 %
+The village total is far less sensitive to the labelling than the per-crop split is,
+which is the expected shape: relabelling moves area between cohorts whose reference yields
+are 1.4-2.7 t/ha, so it redistributes production without creating or destroying much of it.
+
+sensitivity of the forecast to ACCUM_SPAN (shipped 0.3); 0.20 is Round 2's span,
+0.45 is the hand-set cotton discount this write-up criticises Round 2 for:
+ accum_span  village_t  t_ha_area_wt  vs_shipped_pct  median_crop_p90_p10
+      0.150    902.008         2.015           0.904                0.434
+      0.200    899.313         2.009           0.603                0.578
+      0.300    893.924         1.997           0.000                0.867
+      0.450    885.840         1.979          -0.904                1.301
+  The village total is near-flat because the factor is CENTRED: every cohort median is
+  exactly 1.0, so widening the span moves plots symmetrically about it and the sum barely
+  moves. What the span sets is the per-plot SPREAD, which is what it is for. The constant
+  is a statement about how much a within-cohort rank is allowed to say, not a lever on
+  the answer -- and that is now measured rather than asserted.
+
+uncertainty budget on the village total of 893.9 t -- each row is the whole chain
+re-run under that one change, not a formula propagated through it:
+  source                                    low t    high t   +- t    +- %   basis
+  reference yield Y_ref (stated scenario)    804.5    983.3   89.4   10.0   +-10% on the DA&FW 3rd Advance Estimate
+  district crop mix (allocation prior)      832.3    955.3   61.5    6.9   200 draws at sigma=0.51 in log-share, calibrated on Rice and Cotton
+  crop labelling (Round 2's labels)         880.3    893.9    6.8    0.8   the whole chain re-run on the four-date labels
+  speckle on the farm means                 890.1    895.6    2.7    0.3   1000 draws at 4.34/sqrt(N) dB per plot, 5-95 %
+  tier-2 tie ordering                       893.9    893.9    0.0    0.0   200 permutations of the tied keys on departure_T6
+  EXTERNAL assumptions (state reference + district mix) sum to 150.9 t; everything the
+  radar and this pipeline contribute sums to 9.5 t.
+  That is the shape a no-ground-truth forecast should have, and it is a stronger statement
+  than the one this table made until 2026-08-31, when it priced the reference and omitted
+  the crop mix entirely. The per-plot SAR term ranks plots within a cohort; both the level
+  it ranks around AND the size of three of the five cohorts are somebody else's numbers.
+
+  how the district mix was priced, since it is the row most open to challenge:
+    two crops are assigned by threshold rules, not by the mix, so the mix can be
+    scored against them -- district share vs what this village measures:
+      Rice      district 0.26   measured 0.170   log-ratio -0.426
+      Cotton    district 0.32   measured 0.102   log-ratio -1.147
+    the SPREAD of those log-ratios, sigma=0.51, is the scale used to
+    perturb the three tier-2 weights over 200 draws. A common bias renormalises
+    away; what moves the split is the crops disagreeing by different amounts.
+      Bajra     cohort area   13.4 -  184.2 ha
+      Maize     cohort area   21.3 -  246.2 ha
+      Groundnut cohort area   38.1 -  255.9 ha
+    This is a SCENARIO. It assumes the prior errs on the three crops we cannot
+    check by about as much as it errs on the two we can, which is an assumption --
+    but a measured one, and better than assuming the prior is exact.
+  wrote /Users/sumitjadhav/Hackathon/Round 3/work/uncertainty_budget.csv
+
+==============================================================================
+BACK-TEST  fit on T1-T4, predict the withheld 12 November pass
+==============================================================================
+LEAVE-FUTURE-OUT BACK-TEST -- fit on T1-T4 (6 Jun to 13 Oct), predict T6 (12 Nov)
+crop labels are Round 2's, derived from T1-T4 only, so no T6 information reaches any predictor
+
+target: canopy departure from each plot's own June soil   (dB)
+  predictor                     n     MAE    RMSE    bias   skill vs persistence [95% CI]
+  B1 persistence                813   0.926   1.217  +0.188    +0.000  [+0.000, +0.000]
+  B2 cohort mean at T4          813   1.094   1.442  +0.188    -0.403  [-0.632, -0.212]
+  B3 linear extrapolation       813   1.240   1.611  +0.373    -0.751  [-0.899, -0.612]
+  B4 shipped rule (flat hold)   813   0.940   1.327  +0.189    -0.189  [-0.421, +0.002]
+  B5 decaying limb (rejected)   813   1.009   1.320  +0.646    -0.176  [-0.322, -0.054]
+
+target: raw gamma0 level -- nothing about 12 Nov assumed   (dB)
+  predictor                     n     MAE    RMSE    bias   skill vs persistence [95% CI]
+  B1 persistence                813   1.095   1.388  -0.694    +0.000  [+0.000, +0.000]
+  B2 cohort mean at T4          813   1.229   1.589  -0.694    -0.310  [-0.499, -0.141]
+  B3 linear extrapolation       813   1.266   1.647  -0.509    -0.408  [-0.521, -0.305]
+  B4 shipped rule (flat hold)   813   1.142   1.485  -0.693    -0.144  [-0.332, +0.019]
+  B5 decaying limb (rejected)   813   0.891   1.175  -0.236    +0.284  [+0.205, +0.351]
+
+target: raw level, every predictor given the T6 scene drift (control)   (dB)
+  predictor                     n     MAE    RMSE    bias   skill vs persistence [95% CI]
+  B1 persistence                813   1.229   1.536  +0.956    +0.000  [+0.000, +0.000]
+  B2 cohort mean at T4          813   1.350   1.719  +0.956    -0.253  [-0.418, -0.117]
+  B3 linear extrapolation       813   1.567   1.938  +1.141    -0.592  [-0.693, -0.498]
+  B4 shipped rule (flat hold)   813   1.247   1.625  +0.957    -0.119  [-0.280, +0.022]
+  B5 decaying limb (rejected)   813   1.524   1.823  +1.414    -0.409  [-0.532, -0.303]
+
+restricted to where the projection rule actually changes the answer
+  subset                                              n  model  persist   skill
+  rule fires (projection differs from persistence)    732  1.322    1.198  -0.216
+  rule is silent (identical to persistence)            81  1.374    1.374  +0.000
+
+per crop, on the departure target: does the shipped rule beat persistence everywhere or only on average?
+  crop         n   model RMSE   skill [95% CI]           best predictor
+  Bajra       142       0.978   +0.352 [-0.004, +0.559]   B4 shipped rule (flat hold)
+  Cotton       92       1.338   +0.007 [-0.041, +0.065]   B4 shipped rule (flat hold)
+  Groundnut   221       1.125   +0.213 [-0.114, +0.456]   B4 shipped rule (flat hold)
+  Maize       251       0.926   -0.581 [-1.129, -0.208]   B1 persistence
+  Rice        107       2.438   -0.887 [-1.695, -0.326]   B1 persistence
+
+==============================================================================
+VALIDATION  reserved optical, look-direction control, spatial coherence
+==============================================================================
+reserved-scene integrity: no module outside s2_ndvi/validate/figures names ndvi_R1 or ndvi_R2
+
+1. RESERVED OPTICAL -- 2025-12-12 and 2026-01-16, read by nothing upstream. n=813
+   Both dates are post-kharif and inside the rabi window, so they cannot score the yield forecast.
+   They test two specific pre-registered claims.
+
+   1a. cotton must be the greenest label on 12 December
+       crop        n   NDVI 12 Dec   NDVI 16 Jan   NDVI 10 Jun
+       Bajra      112         0.474         0.647         0.356
+       Cotton      58         0.690         0.742         0.232
+       Groundnut  257         0.532         0.541         0.403
+       Maize      277         0.505         0.565         0.378
+       Rice       109         0.502         0.601         0.591
+       highest: Cotton  -> PASS
+       one-sided Mann-Whitney cotton > rest on 12 Dec: p=1.26e-11
+
+   1b. perennial parcels must be green in December AND in June
+       10 Jun  perennial 0.247   rest 0.397   FAIL   p(greater)=1.0e+00 p(less)=1.1e-04
+       12 Dec  perennial 0.777   rest 0.519   PASS   p(greater)=1.6e-05 p(less)=1.0e+00
+       16 Jan  perennial 0.756   rest 0.568   PASS   p(greater)=4.9e-04 p(less)=1.0e+00
+       -> FALSIFIED on June. June radar level -20.24 vs -20.42 dB (p=0.71): bare like everything else.
+       -> 9 of 12 never fall more than 0.5 dB between consecutive passes, and all stay green to 16 Jan.
+       -> Not an orchard. A long-duration crop sown with the monsoon and still standing in January
+          (sugarcane and banana both fit, and both are grown in Vadodara). The screen's actual
+          claim -- not one of the five kharif annuals -- survives.
+
+   1c. NEGATIVE control -- plots cleared of kharif by 12 Nov should be under rabi in December,
+       not bare. If they were bare, the reserved scene would be measuring kharif and 1a would mean
+       something different from what it claims.
+       cleared (>0.8) n= 196  NDVI 12 Dec 0.488   standing (<0.2) n= 160  0.613
+       population median 12 Dec 0.520 -- cleared plots are NOT bare (control holds)
+
+2. LOOK-DIRECTION CONTROL -- is the T5 anomaly geometry rather than crop state?
+   elongated parcels only (axis ratio >= 1.5), n=650
+   rho(angle to the T5 look, t5_anomaly)       = -0.051 (p=0.195)
+   rho(cos 2*(row azimuth - look), t5_anomaly) = +0.051 (p=0.195)
+   threshold |rho| = 0.2; verdict: clean
+   T5's LEVEL is not used anywhere regardless: `farm_features` replaces it with the T4-T6
+   interpolation, and only the residual `t5_anomaly` survives as a weak covariate.
+
+3. SPATIAL COHERENCE -- Moran's I, 8 nearest neighbours
+   yield forecast         I=+0.279  (permutation mean -0.001, p<0.001, 0/999 permutations reached it)
+   season integral        I=+0.187  (permutation mean -0.001, p<0.001, 0/999 permutations reached it)
+   within-crop residual   I=+0.151  (permutation mean -0.001, p<0.001, 0/999 permutations reached it)
+   Null is 999 permutations, so the smallest p this test can report is 1/1000 = 0.001.
+   Neighbouring fields share soil, water and management, so positive I on the forecast is expected.
+   Positive I on the residual means real spatial structure the crop label alone does not carry;
+   I near zero would mean the residual is plot-level noise.
+
+==============================================================================
+PHASE 7  aggregation and the shipped tables
+==============================================================================
+
+the village rollup, checked against the village polygon rather than the village name
+  Sokhda_Village.shp holds 1 polygon(s): Sokhda
+  962 of 966 plots assign to the same village by largest shared area as by attribute
+  0 disagree; 4 intersect no village polygon at all (0.0000 ha)
+  7 degenerate parcels had zero intersection with every polygon and were placed by centroid
+  parcel area inside the boundary 447.5 ha of 447.5 ha digitised (100.00 %)
+  the village polygon encloses 1174.1 ha, so the digitised parcels are 38.1 % of Sokhda
+  The village total is therefore a total over the mapped farmland of one village,
+  not over the village's whole area. Everything outside these parcels -- the built-up core,
+  roads, water, and any undigitised field -- is not forecast and is not claimed.
+
+farm_forecast.csv  966 rows x 21 columns, schema gate PASSED, village table reconstructs from it
+ village_id village_name  farm_id  area_ha crop_type crop_confidence  crop_margin  long_duration_flag data_quality  n_valid_dates  has_canopy  canopy_peak_db  canopy_peak_doy  canopy_end_db  cleared_fraction  season_integral_db  extrapolated_fraction  accumulation_response  yield_ref_t_ha  yield_forecast_t_ha  production_t
+         22       Sokhda        1   0.2843     Bajra             low       0.4686               False     measured              6       False             0.0              NaN            0.0               NaN             -2.1557                    0.0                 0.9687           1.362               1.3194        0.3751
+         22       Sokhda        2   0.2215     Bajra             low       0.4728               False     measured              6       False             0.0              NaN            0.0               NaN             -1.8187                    0.0                 0.9829           1.362               1.3386        0.2965
+         22       Sokhda        3   0.5009     Maize             low       0.2625               False     measured              6       False             0.0              NaN            0.0               NaN             -1.3489                    0.0                 0.7000           2.035               1.4245        0.7135
+
+village aggregate by crop (area-weighted; production is the true sum):
+ village_id village_name crop_type  n_farms  area_ha  area_share  yield_ref_t_ha  yield_t_ha_area_wt  yield_t_ha_p10  yield_t_ha_p90  production_t  extrapolated_fraction_area_wt  high_confidence_share
+         22       Sokhda     Bajra      139   61.822       0.138           1.362               1.400           1.200           1.644        86.556                          0.000                  0.000
+         22       Sokhda    Cotton       62   45.460       0.102           1.621               1.623           1.188           1.932        73.803                          0.558                  0.971
+         22       Sokhda Groundnut      341  124.669       0.279           2.734               2.660           2.191           3.474       331.663                          0.000                  0.000
+         22       Sokhda     Maize      313  139.617       0.312           2.035               1.961           1.502           2.498       273.743                          0.000                  0.000
+         22       Sokhda      Rice      111   75.970       0.170           1.675               1.687           1.243           2.110       128.157                          0.000                  0.979
+         22       Sokhda       ALL      966  447.539       1.000             NaN               1.997           1.355           3.035       893.922                          0.057                  0.265
+
+within-village breakdown -- 46 sub-zones of 500 m carrying at least 5 farms
+A single-village study area makes the required village table one row. This is where the
+spatial variation actually lives, and it is the same area-weighted arithmetic at a smaller scale.
+zone  n_farms  area_ha  yield_t_ha_area_wt  production_t dominant_crop  cleared_fraction_median  measured_share
+ Z73       20    15.57                1.50         23.31         Maize                     1.00            1.00
+ Z62        7     5.65                1.53          8.64          Rice                     0.80            1.00
+ Z72       16     9.30                1.56         14.50          Rice                     1.00            0.94
+ Z56       25    11.28                1.57         17.73          Rice                     1.00            1.00
+ Z63       18    11.45                1.59         18.22         Bajra                     1.00            1.00
+ Z71        9     3.62                1.66          6.00         Maize                     0.33            0.78
+ Z21       18    17.00                1.69         28.69        Cotton                     0.07            1.00
+ Z52        7     4.74                1.71          8.12         Maize                     0.00            1.00
+ Z41       22    13.90                1.76         24.47         Maize                     0.94            1.00
+ Z44       26    12.83                1.79         23.01          Rice                     0.63            1.00
+ Z74       13     6.99                1.79         12.54     Groundnut                     0.55            1.00
+ Z64       23    20.63                1.81         37.40         Maize                     0.82            1.00
+ Z31       14    13.75                1.82         25.02         Maize                     0.85            1.00
+ Z51       17    10.50                1.82         19.11         Bajra                     0.64            1.00
+ Z53        5     3.91                1.86          7.29         Maize                     1.00            1.00
+ Z54       16    10.39                1.92         19.96     Groundnut                     0.55            1.00
+ Z42       19    16.59                1.92         31.88         Maize                     0.76            1.00
+ Z30       10     8.04                1.93         15.50         Maize                     0.95            1.00
+ Z46       25     8.35                1.93         16.11     Groundnut                     0.28            1.00
+ Z43       24    13.59                2.00         27.19     Groundnut                     0.63            1.00
+ Z04       62    11.17                2.01         22.48         Maize                     0.75            0.63
+ Z50       15     9.45                2.01         19.04     Groundnut                     0.00            0.93
+ Z23       27     9.48                2.02         19.16         Maize                     0.70            1.00
+ Z33       28    15.42                2.04         31.45         Maize                     0.56            1.00
+ Z32       23    19.36                2.06         39.93     Groundnut                     0.58            1.00
+ Z55       14     9.11                2.08         18.94     Groundnut                     0.08            1.00
+ Z45       38    12.91                2.10         27.04         Maize                     0.73            1.00
+ Z34       37     7.24                2.12         15.32     Groundnut                     0.79            1.00
+ Z66        9     0.55                2.16          1.19         Maize                     0.56            0.44
+ Z12       30    13.25                2.18         28.82         Maize                     0.98            1.00
+ Z22       16    11.71                2.19         25.64     Groundnut                     0.44            1.00
+ Z13       36     8.94                2.24         20.00     Groundnut                     0.71            1.00
+ Z61       21    15.20                2.27         34.44     Groundnut                     0.43            0.95
+ Z03       33     7.36                2.28         16.75     Groundnut                     0.61            1.00
+ Z14       33     5.95                2.30         13.65         Maize                     0.74            1.00
+ Z01        9     6.96                2.32         16.13     Groundnut                     0.75            1.00
+ Z35       16     7.81                2.33         18.22     Groundnut                     0.52            1.00
+ Z11       10     7.08                2.34         16.56         Maize                     0.79            1.00
+ Z60       17    12.30                2.36         29.09     Groundnut                     0.00            1.00
+ Z24       10     2.07                2.42          5.01     Groundnut                     0.70            1.00
+ Z25       32     4.87                2.56         12.45     Groundnut                     0.32            1.00
+ Z02       18     8.26                2.62         21.63     Groundnut                     0.79            1.00
+ Z05        8     1.38                2.70          3.74         Maize                     0.82            0.00
+ Z36        8     1.71                2.71          4.64     Groundnut                     0.00            1.00
+ Z10        5     2.96                2.72          8.04         Maize                     0.95            1.00
+ Z15       57     7.32                2.80         20.48     Groundnut                     0.57            0.51
+
+yield spread across sub-zones: 1.50 to 2.80 t/ha (1.30 t/ha, against a village figure of 2.00)
+covered: 946/966 farms, 437.9/447.5 ha; the rest sit in cells below the 5-farm floor
+
+==============================================================================
+FIGURES
+==============================================================================
+wrote /Users/sumitjadhav/Hackathon/Round 3/figures/cover.png
+wrote /Users/sumitjadhav/Hackathon/Round 3/figures/sar_composite.png
+wrote /Users/sumitjadhav/Hackathon/Round 3/figures/yield_forecast_map.png
+wrote /Users/sumitjadhav/Hackathon/Round 3/figures/crop_type_map.png
+wrote /Users/sumitjadhav/Hackathon/Round 3/figures/trajectories.png
+wrote /Users/sumitjadhav/Hackathon/Round 3/figures/canopy_departure.png
+wrote /Users/sumitjadhav/Hackathon/Round 3/figures/canopy_sign.png
+wrote /Users/sumitjadhav/Hackathon/Round 3/figures/model_chain.png
+wrote /Users/sumitjadhav/Hackathon/Round 3/figures/extrapolation.png
+wrote /Users/sumitjadhav/Hackathon/Round 3/figures/backtest.png
+wrote /Users/sumitjadhav/Hackathon/Round 3/figures/reserved_optical.png
+wrote /Users/sumitjadhav/Hackathon/Round 3/figures/zone_map.png
+wrote /Users/sumitjadhav/Hackathon/Round 3/figures/village_summary.png
+wrote /Users/sumitjadhav/Hackathon/Round 3/figures/uncertainty_budget.png
+
+DONE   peak RSS 0 MB
+EXIT 0

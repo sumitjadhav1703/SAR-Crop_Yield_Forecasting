@@ -1,0 +1,148 @@
+         0.0  [T1 20250606] theta=35.24 deg focusing surface h=-21.53 m geocoding at fitted h=-17.15 m shift=(0.0 0.0) -> gamma0_lin_T1_20250606.tif
+           0  [T1 20250606] calibrating 4682x27192 SLC ...
+    1.26e-11  one-sided Mann-Whitney cotton > rest on 12 Dec: p=1.26e-11
+        1e-6  Area-weighted not plot-averaged: plots span 8.55e-16-3.49 ha (median 0.27). 10 parcels have degenerate geometry (< 1e-6 ha):
+     1.1e-04  10 Jun  perennial 0.247   rest 0.397   FAIL   p(greater)=1.0e+00 p(less)=1.1e-04
+       0.001  T5 vs T1   over the farms dy=+1.09 dx=-1.00 px  |d|=1.48 m  peak=0.00172  [PASS]   full AOI |d|= 1.43 m  peak=0.00147
+      0.0015  T5 vs T1   over the farms dy=+1.09 dx=-1.00 px  |d|=1.48 m  peak=0.00172  [PASS]   full AOI |d|= 1.43 m  peak=0.00147
+      0.0023  2 (allocated)  departure_T6         735     0.0335     0.00231     0.847   4.29e-01
+       0.005  T6 vs T1   over the farms dy=-0.11 dx=-0.05 px  |d|=0.13 m  peak=0.00575  [PASS]   full AOI |d|= 0.12 m  peak=0.00463
+       0.022  B4 shipped rule (flat hold)   813   1.247   1.625  +0.957    -0.119  [-0.280 +0.022]
+       0.051  3    135   0.396-0.455       0.426         -0.051       +4.85
+        0.06  T3 vs T1   over the farms dy=+0.05 dx=+0.02 px  |d|=0.06 m  peak=0.00717  [PASS]   full AOI |d|= 0.08 m  peak=0.00611
+       0.085  same integral on |departure|         rho=-0.085  p= 1.49e-02  n=813
+         0.1  T1  valid= 79.6%  vendor= 79.4%  IoU=0.9984  ours-only=0.160%  [PASS]
+       0.102  Cotton    district 0.32   measured 0.102   log-ratio -1.147
+       0.119  corr(NDVI 13 Oct within-field CoV T4   ) = -0.119 pearson -0.139 spearman
+        0.15  Rice           -18.22   -16.73   -16.88   -18.47   -17.71    -0.15    -1.58
+       0.151  within-crop residual   I=+0.151  (permutation mean -0.001 p<0.001 0/999 permutations reached it)
+       0.170  Rice      district 0.26   measured 0.170   log-ratio -0.426
+       0.195  rho(angle to the T5 look t5_anomaly)       = -0.051 (p=0.195)
+         0.2  T2  valid= 78.5%  vendor= 78.5%  IoU=0.9964  ours-only=0.215%  [PASS]
+       0.213  Groundnut   221       1.125   +0.213 [-0.114 +0.456]   B4 shipped rule (flat hold)
+       0.216  rule fires (projection differs from persistence)    732  1.322    1.198  -0.216
+       0.247  10 Jun  perennial 0.247   rest 0.397   FAIL   p(greater)=1.0e+00 p(less)=1.1e-04
+        0.26  -29.2..  -23.1    31316   +1.97   -3.54   +0.26
+        0.27  held-out left-looking dates: 4.01 dB apart before the offsets 0.27 dB after [PASS tolerance 1.5 dB]
+       0.280  B4 shipped rule (flat hold)   813   1.247   1.625  +0.957    -0.119  [-0.280 +0.022]
+       0.284  B5 decaying limb (rejected)   813   0.891   1.175  -0.236    +0.284  [+0.205 +0.351]
+        0.32  fitted terrain heights six scenes at five incidence angles: mean -17.34 m spread 0.89 m std 0.32 m
+       0.334  Bajra        142  +0.334   4.93e-05     +1.90           -  CONTRADICTS
+       0.352  Bajra       142       0.978   +0.352 [-0.004 +0.559]   B4 shipped rule (flat hold)
+        0.36  2    135   0.334-0.396       0.364         -0.350      +12.89
+       0.397  10 Jun  perennial 0.247   rest 0.397   FAIL   p(greater)=1.0e+00 p(less)=1.1e-04
+       0.409  B5 decaying limb (rejected)   813   1.524   1.823  +1.414    -0.409  [-0.532 -0.303]
+    4.29e-01  2 (allocated)  departure_T6         735     0.0335     0.00231     0.847   4.29e-01
+        0.45  same-day T6                            n= 813  rho=+0.454  p=1.32e-42
+       0.472  same integral clipped at zero        rho=+0.472  p= 2.47e-46  n=813
+       0.499  B2 cohort mean at T4          813   1.229   1.589  -0.694    -0.310  [-0.499 -0.141]
+       0.529  overall rho=-0.529 (n=479 p=6.85e-36); expected negative and it is
+       0.532  B5 decaying limb (rejected)   813   1.524   1.823  +1.414    -0.409  [-0.532 -0.303]
+       0.564  observed_integral (SIGNED shipped)  rho=+0.564  p= 1.54e-69  n=813
+       0.569  ALL          813  +0.569   8.11e-71     +4.93           mixed
+        0.66  anomaly                     119.0 % of mean z = +0.66
+       0.690  Cotton      58         0.690         0.742         0.232
+       0.705  Groundnut    221  +0.705   1.58e-34     +5.04           -  CONTRADICTS
+        0.77  peak canopy     median  0.77 dB   p10  0.00   p90  2.26
+        0.82  6    136   0.646-0.824       0.701         +1.452       +4.15
+        0.89  fitted terrain heights six scenes at five incidence angles: mean -17.34 m spread 0.89 m std 0.32 m
+       1.000  22       Sokhda       ALL      966  447.539       1.000             NaN               1.997           1.355           3.035       893.922                          0.057                  0.265
+        1.00  T5 vs T1   over the farms dy=+1.09 dx=-1.00 px  |d|=1.48 m  peak=0.00172  [PASS]   full AOI |d|= 1.43 m  peak=0.00147
+          01  [T4 20251013] calibrating 4244x27241 SLC ...
+           1  PHASE 1  calibration geocoding co-registration  (6 scenes)
+        1.35  2 (allocated)  g0_db_filled_T4      735     0.0335     0.03017    11.387   1.35e-05
+        1.40  6   1    Rice          44   27.7        1.40      0.94     -2.20     -1.86      0.98     -0.45      0.83     -0.51     -1.11
+        1.48  T5 vs T1   over the farms dy=+1.09 dx=-1.00 px  |d|=1.48 m  peak=0.00172  [PASS]   full AOI |d|= 1.43 m  peak=0.00147
+        1.50  Maize       313  139.6    2.04   2.02   1.50   2.50    0.00  grain
+         1.5  [T1 20250606] theta=35.24 deg focusing surface h=-21.53 m geocoding at fitted h=-17.15 m shift=(0.0 0.0) -> gamma0_lin_T1_20250606.tif
+        1.62  Cotton       62   45.5    1.62   1.58   1.19   1.93    0.56  seed cotton (kapas)
+        1.65  -21.4..  -21.0    31316   +2.30   -1.65   -0.34
+        1.69  Rice       111.0   75.97     1.69  128.16  109.0   82.32     1.67  137.85  -9.69
+        1.96  Maize      313.0  139.62     1.96  273.74  293.0  130.40     1.98  257.67  16.08
+        2.00  village production forecast: 893.9 t over 447.5 ha (2.00 t/ha area-weighted)
+           2  [T1 20250606] calibrating 4682x27192 SLC ...
+         2.3  -21.4..  -21.0    31316   +2.30   -1.65   -0.34
+        2.66  Groundnut  341.0  124.67     2.66  331.66  296.0  115.83     2.66  308.26  23.41
+         2.7  3   2    Bajra/Groundnut/Maize   7    7.3       -0.23     -0.56     -0.16      0.21      0.37      2.78      0.25     -0.52     -0.59
+        2.80  Z15       57     7.32                2.80         20.48     Groundnut                     0.57            0.51
+           3  [T1 20250606] theta=35.24 deg focusing surface h=-21.53 m geocoding at fitted h=-17.15 m shift=(0.0 0.0) -> gamma0_lin_T1_20250606.tif
+         3.5  -29.2..  -23.1    31316   +1.97   -3.54   +0.26
+           4  [T1 20250606] calibrating 4682x27192 SLC ...
+        4.01  held-out left-looking dates: 4.01 dB apart before the offsets 0.27 dB after [PASS tolerance 1.5 dB]
+        4.15  6    136   0.646-0.824       0.701         +1.452       +4.15
+        4.26  cross-date AOI-median spread = 4.26 dB. NOT a gate: this is vegetation and surface moisture
+        4.28  T6    left   29.7         -12.23 +4.28*          -7.95       -24.03   HELD OUT
+           5  [T1 20250606] calibrating 4682x27192 SLC ...
+           6  PHASE 1  calibration geocoding co-registration  (6 scenes)
+         6.8  overall rho=-0.529 (n=479 p=6.85e-36); expected negative and it is
+         6.9  T2          -19.76       86.9   monsoon onset wet soil crop barely emerged
+           8  [T1 20250606] calibrating 4682x27192 SLC ...
+         8.1  -19.3..  -18.1    31316   +3.13   +1.36   +0.30
+         9.5  n_clusters=9   n_seeds=40  all 99.5%   tier1 100.0% over 170 farms   (high-conf area 118.5 ha vs 118.5)
+          10  [T2 20250619] calibrating 3910x27187 SLC ...
+          12  [T6 20251112] calibrating 4031x27273 SLC ...
+          13  [T4 20251013] calibrating 4244x27241 SLC ...
+          16  [T5 20251029] theta=29.84 deg focusing surface h=-21.53 m geocoding at fitted h=-16.73 m shift=(0.0 0.0) -> gamma0_lin_T5_20251029.tif
+       17.34  fitted terrain heights six scenes at five incidence angles: mean -17.34 m spread 0.89 m std 0.32 m
+          18  [T2 20250619] calibrating 3910x27187 SLC ...
+          22  [T4 20251013] theta=31.53 deg focusing surface h=-21.53 m geocoding at fitted h=-17.41 m shift=(1.22 -0.96) -> gamma0_lin_T4_20251013.tif
+          26  T1  median=-21.52 dB   max= 27.0 dB [PASS]   NESZ=-26.13 dB margin= 4.6 dB [PASS]   CoV=1.01 ENL=0.98  22.8% below NESZ
+        26.5  T1          -21.44       26.5   pre-monsoon bare to sparse
+          29  [T2 20250619] theta=28.77 deg focusing surface h=-21.53 m geocoding at fitted h=-17.61 m shift=(4.29 -2.57) -> gamma0_lin_T2_20250619.tif
+          30  gated over FARM_WINDOW (308300.0 2478950.0 312950.0 2483100.0) the ground the 966 plots sit on;
+        31.6  Groundnut  341.0  124.67     2.66  331.66  296.0  115.83     2.66  308.26  23.41
+          36  -19.3..  -18.1    31316   +3.13   +1.36   +0.30
+          37  plots with a canopy episode above 0.5 dB: 588  (60.9 %); below it 378
+        38.1  Groundnut cohort area   38.1 -  255.9 ha
+          39  [T2 20250619] calibrating 3910x27187 SLC ...
+        45.5  Cotton      62 farms    45.5 ha  10.2%  (district 32%)  measured
+          46  [T1 20250606] calibrating 4682x27192 SLC ...
+          56  2025-10-13: AOI SCL-valid 100.0%; farms with >=60% valid core 956/966
+        61.5  district crop mix (allocation prior)      832.3    955.3   61.5    6.9   200 draws at sigma=0.51 in log-share calibrated on Rice and Cotton
+        61.8  Bajra      139 farms    61.8 ha  13.8%  (district 8%)  allocated
+          62  [T3 20250814] theta=28.69 deg focusing surface h=-21.53 m geocoding at fitted h=-17.62 m shift=(0.85 -1.18) -> gamma0_lin_T3_20250814.tif
+          63  T6 vs T1   over the farms dy=-0.11 dx=-0.05 px  |d|=0.13 m  peak=0.00575  [PASS]   full AOI |d|= 0.12 m  peak=0.00463
+        63.1  T5    20251029  01:37  right      0.7    63.1    64.3    53.1
+          71  [T1 20250606] calibrating 4682x27192 SLC ...
+        73.8  T5  valid= 73.6%  vendor= 73.8%  IoU=0.9980  ours-only=0.000%  [PASS]
+        76.0  Rice       111 farms    76.0 ha  17.0%  (district 26%)  measured
+        79.1  2025-10-28  2 tile(s) 43QCE+43QBE  tile cloud  79.1%
+        80.6  clipped at zero           80.6%       0.0%       0.3%       0.3%       0.9%
+          82  [T1 20250606] calibrating 4682x27192 SLC ...
+        86.6  Bajra      139.0   61.82     1.40   86.56  167.0   57.73     1.31   75.85  10.71
+        89.4  reference yield Y_ref (stated scenario)    804.5    983.3   89.4   10.0   +-10% on the DA&FW 3rd Advance Estimate
+          90  peak canopy     median  0.77 dB   p10  0.00   p90  2.26
+         108  EXTERNAL: the first-pass T5 shift, coreg log
+         111  [T6 20251112] calibrating 4031x27273 SLC ...
+       124.7  Groundnut  341 farms   124.7 ha  27.9%  (district 16%)  allocated
+       128.2  Rice       111.0   75.97     1.69  128.16  109.0   82.32     1.67  137.85  -9.69
+         135  2    135   0.334-0.396       0.364         -0.350      +12.89
+         139  Maize      313 farms   139.6 ha  31.2%  (district 18%)  allocated
+       139.6  Maize      313 farms   139.6 ha  31.2%  (district 18%)  allocated
+       150.9  EXTERNAL assumptions (state reference + district mix) sum to 150.9 t; everything the
+         153  153 of 966 plots are not fully observed on all six dates (15.8 %)
+       273.7  Maize      313.0  139.62     1.96  273.74  293.0  130.40     1.98  257.67  16.08
+         313  invariant targets: 314 of 313161 8 m blocks the top 0.1 % of min(T1 T2 T3).
+       318.4  EXTERNAL: T5 view azimuth, scene metadata
+       331.7  Groundnut  341.0  124.67     2.66  331.66  296.0  115.83     2.66  308.26  23.41
+         341  Groundnut  341 farms   124.7 ha  27.9%  (district 16%)  allocated
+         392  plots across 392 distinct values.
+         403  [T6 20251112] calibrating 4031x27273 SLC ...
+       447.5  village production forecast: 893.9 t over 447.5 ha (2.00 t/ha area-weighted)
+         479  overall rho=-0.529 (n=479 p=6.85e-36); expected negative and it is
+         500  Rice       109    0.500  -18.45  -16.82   -1.63
+         650  elongated parcels only (axis ratio >= 1.5) n=650
+         732  bare-soil drift measured off 16473273 AOI pixels that belong to no farm polygon and are not built-up
+         793  the clipped axis this one replaced tied 403 of 793 allocated plots on one value
+         813  966 farms; data quality: measured=813 interpolated=82 imputed=71
+       893.9  village production forecast: 893.9 t over 447.5 ha (2.00 t/ha area-weighted)
+       923.1  1995-2024 mean               923.1 mm (median 905.8 sd 266.6)
+         962  962 of 966 plots assign to the same village by largest shared area as by attribute
+         966  gated over FARM_WINDOW (308300.0 2478950.0 312950.0 2483100.0) the ground the 966 plots sit on;
+         999  T4  valid= 78.8%  vendor= 78.9%  IoU=0.9992  ours-only=0.015%  [PASS]
+      1098.5  2025 season total          1098.5 mm
+      1174.1  the village polygon encloses 1174.1 ha so the digitised parcels are 38.1 % of Sokhda
+        1995  1995-2024 mean               923.1 mm (median 905.8 sd 266.6)
+        2024  1995-2024 mean               923.1 mm (median 905.8 sd 266.6)
+        2025  [T1 20250606] calibrating 4682x27192 SLC ...
+        2026  R2  candidate dates in 2026-01-08T00:00:00Z/2026-01-18T23:59:59Z:
