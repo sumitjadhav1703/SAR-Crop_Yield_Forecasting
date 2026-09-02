@@ -89,7 +89,7 @@ def village_outline() -> list:
 
     The farm polygons alone float in white space, which reads as a point cloud rather than a
     village. The boundary is what makes the maps legible as a place, and it also shows how
-    much of the village is unparcelled -- 447.5 ha of farms inside a ~1,080 ha polygon.
+    much of the village is unparcelled -- 447.5 ha of farms inside a 1174.1 ha polygon.
     """
     src = ogr.Open(VILLAGE_SHP)
     layer = src.GetLayer()
