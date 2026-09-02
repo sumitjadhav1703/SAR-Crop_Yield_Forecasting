@@ -16,10 +16,14 @@ All work below was done on 2026-08-25 and 2026-08-26.
 ## The ledger of pre-registered claims
 
 Every hypothesis that was written down before the data that could test it was opened, with
-its outcome. **Eight of the thirteen were contradicted, one was not met, and four held.**
+its outcome. **Nine of the seventeen were contradicted, one was not met, and seven held.**
 The contradicted ones did more for the final model than the ones that held: four of them
-deleted a term, a rule or a whole module, and the eighth deleted a claim we had already
+deleted a term, a rule or a whole module, and the twelfth deleted a claim we had already
 published.
+
+The ledger lives in the source as `validate.LEDGER`, is printed by every run, and is drawn
+as `figures/ledger.png`. The counts above are computed from that tuple rather than typed
+beside it, so a fourteenth claim cannot leave this paragraph stale.
 
 | # | stage | claim, written before the test | outcome |
 |---|---|---|---|
@@ -36,6 +40,10 @@ published.
 | 11 | S9 | Plot orientation relative to the T5 look direction does not drive `t5_anomaly` (\|rho\| < 0.2) | **held** — rho = −0.051, p = 0.195 |
 | 12 | S15 | Re-ranking tier 2 on the signed departure separates the cohorts better on residualised NDVI than the clipped axis did (η² 0.0274, F 10.30) | **contradicted in S14** — the test residualised against the wrong axis. Corrected: η² 0.0023, F 0.847, **p = 0.43** |
 | 13 | S15 | `t5_anomaly` orders the tier-2 cohorts Bajra > Maize > Groundnut, most soil-exposed first | **contradicted** — medians Maize +0.82, Groundnut +0.55, Bajra +0.36 dB |
+| 14 | S32 | Skill against persistence is non-positive at every horizon and decays as the horizon lengthens | **contradicted** — +0.140 [+0.071, +0.202] at 60 days against −0.180 [−0.330, −0.056] at 30. Positive at the *longer* horizon; the driver is phenology, not horizon length |
+| 15 | S33 | C-band: cotton's canopy declines less than the annual cohorts over 15 Nov – 21 Dec, the window the model holds flat | **held** — cotton +0.985 dB against an annual median of −0.020, and the only cohort above its own June soil on 21 December |
+| 16 | S33 | C-band: the 10 Oct – 15 Nov change correlates positively with the X-band T4–T6 change | **held** — rho = +0.248, n = 813; positive, and far weaker than the +0.569 the same construction scores at X-band |
+| 17 | S33 | C-band: a season integral from 6 passes on the Capella calendar ranks plots like one from every pass, rho ≥ 0.8 | **held** — rho = +0.915, n = 956, median difference 0.27 dB over the same DOY span |
 
 ---
 

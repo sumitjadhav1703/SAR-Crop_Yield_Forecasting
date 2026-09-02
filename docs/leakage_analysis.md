@@ -107,6 +107,36 @@ not measured. Two guards:
   `phenology.clearing_sensitivity` over `MIN_CANOPY_DB` ∈ {0.25, 0.5, 1.0}. A threshold
   whose result only exists at one value is visible as such.
 
+## 3b. A second instrument, and the rule that keeps it outside the model
+
+`src/s1_audit.py` reads 16 Sentinel-1 passes over the same plots. A validation instrument is
+only independent for as long as nothing in the model touches it, and "nothing touches it" is
+a claim that decays silently — a single convenient import a week from now would leave every
+number in section 4b of `validation_strategy.md` looking exactly as good as it does today
+while meaning nothing.
+
+So it is enforced rather than asserted:
+
+- `tests/test_pipeline.py::test_s1_audit_is_not_imported_by_any_model_module` scans every
+  module in `src/` and fails if any of them names `s1_audit`. `pipeline.py` is the single
+  exemption, because it is the runner: it calls the report *after* the forecast is already
+  computed and passes nothing back.
+- The module runs last in the chain, after `submit`. If a C-band column ever reached a
+  feature, a label or the forecast, the village total would move — so the shipped headline
+  is itself a check on this.
+
+**What this does not guard.** The exemption is real: `pipeline` could be edited to thread a
+value from `s1_audit` back into the forecast, and the test would still pass. That is the same
+class of limitation as `assert_reserved_unread`, which is a lint over source text rather than
+a runtime capability check, and it is stated here for the same reason — a guard described as
+stronger than it is, is worse than no guard.
+
+**On the direction of the P16 result.** The sampling-adequacy test compares a 6-pass integral
+against a 13-pass integral *on C-band*. It says six acquisitions on the Capella calendar
+recover a dense integral's ranking **for a C-band series over these fields**. It does not
+prove the same for X-band, which has a shallower penetration and a different dynamic range,
+and the write-up does not claim it does.
+
 ## 4. What is NOT claimed
 
 - The Y_ref term is a published state figure, not a fit. It moves every plot in a cohort by

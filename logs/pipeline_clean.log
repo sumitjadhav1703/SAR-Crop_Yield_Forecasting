@@ -194,6 +194,15 @@ S2 dates: 2025-10-13 (Capella T4 13 Oct) and 2025-11-12 (Capella T6 12 Nov)
    Bajra        142  +0.334   4.93e-05     +1.90           -  CONTRADICTS
    Groundnut    221  +0.705   1.58e-34     +5.04           -  CONTRADICTS
 
+2b. The same headline rho under a 500 m SPATIAL BLOCK bootstrap, 999 draws:
+    rho = +0.569, 95 % interval [+0.508, +0.618] over 50 blocks
+    (n = 813, median 16 plots per block)
+    The p beside the ALL row above assumes 813 independent plots, and this project's own
+    Moran's I says they are not. Resampling whole 500 m cells keeps the spatial dependence
+    intact and prices the correlation against it instead of against an independence
+    assumption the data contradicts. The interval is the honest statement; the analytic p is
+    printed above only because removing it would hide the size of the difference.
+
 3. The season integral: the shipped form against the two alternatives
    all three scored against the same reference: mean NDVI of the two optical dates
    observed_integral (SIGNED, shipped)  rho=+0.564  p= 1.54e-69  n=813
@@ -407,6 +416,8 @@ tier is the live ranking axis, `departure_T6`; the second is
 ==============================================================================
 PHASE 5  season context and the reference yield
 ==============================================================================
+  fetching NASA POWER 20250101..20251231 ...
+  fetching NASA POWER 19950101..20241231 ...
 kharif 2025 rainfall at Sokhda (NASA POWER PRECTOTCORR, Jun-Nov)
   2025 season total          1098.5 mm
   1995-2024 mean               923.1 mm (median 905.8, sd 266.6)
@@ -506,6 +517,7 @@ are 1.4-2.7 t/ha, so it redistributes production without creating or destroying 
 sensitivity of the forecast to ACCUM_SPAN (shipped 0.3); 0.20 is Round 2's span,
 0.45 is the hand-set cotton discount this write-up criticises Round 2 for:
  accum_span  village_t  t_ha_area_wt  vs_shipped_pct  median_crop_p90_p10
+      0.000    910.092         2.034           1.809                0.000
       0.150    902.008         2.015           0.904                0.434
       0.200    899.313         2.009           0.603                0.578
       0.300    893.924         1.997           0.000                0.867
@@ -515,6 +527,15 @@ sensitivity of the forecast to ACCUM_SPAN (shipped 0.3); 0.20 is Round 2's span,
   moves. What the span sets is the per-plot SPREAD, which is what it is for. The constant
   is a statement about how much a within-cohort rank is allowed to say, not a lever on
   the answer -- and that is now measured rather than asserted.
+
+null-model ablation, a() == 1 -- the forecast with the radar taken out:
+  village total 910.1 t against the shipped 893.9 t, a difference of -16.2 t (-1.78 %)
+  per plot the same removal moves the forecast by a median 11.8 % and 30.0 % at p90;
+  734 of 966 plots move more than 5 %.
+  That gap is the whole of what the radar buys, and it is a REDISTRIBUTION: the level comes
+  from Y_ref and the season integral only decides which plots sit above and below it. The
+  uncertainty budget prices the same asymmetry from the other side -- 150.9 t of external
+  assumption against 9.5 t of radar.
 
 uncertainty budget on the village total of 893.9 t -- each row is the whole chain
 re-run under that one change, not a formula propagated through it:
@@ -590,6 +611,30 @@ per crop, on the departure target: does the shipped rule beat persistence everyw
   Maize       251       0.926   -0.581 [-1.129, -0.208]   B1 persistence
   Rice        107       2.438   -0.887 [-1.695, -0.326]   B1 persistence
 
+skill against persistence at every horizon the stack supports, departure target
+  (label-free predictors only: Round 2's labels have seen T4, so at the hold-T3-predict-T4
+   split they leak the target. The two predictors needing a label are dropped rather than
+   re-derived per horizon, which also removes B4's calendar-harvest zeroing -- so the 30-day
+   row below is NOT the shipped -0.119, it is the same rule with its calendar taken away.)
+  fit     predict  days     n  predictor                      RMSE    skill [95% CI]
+  T3      T4        60   813  B1 persistence              1.553   +0.000 [+0.000, +0.000]
+  T3      T4        60   813  B4 flat hold (no calendar)  1.440   +0.140 [+0.071, +0.202]
+  T3-T4   T6        30   813  B1 persistence              1.217   +0.000 [+0.000, +0.000]
+  T3-T4   T6        30   813  B4 flat hold (no calendar)  1.322   -0.180 [-0.330, -0.056]
+  T3-T4   T6        30   813  B3 linear extrapolation     1.611   -0.751 [-0.895, -0.610]
+  The flat hold's skill by horizon: 30 d -0.180 [-0.330, -0.056], 60 d +0.140 [+0.071, +0.202].
+  PRE-REGISTERED AND CONTRADICTED. The claim was that skill is non-positive at every horizon
+  and decays as the horizon lengthens. It is +0.140 [+0.071, +0.202] at 60 days and -0.180
+  [-0.330, -0.056] at 30 -- positive at the LONGER horizon, and neither interval contains zero.
+  The mechanism is phenological, not temporal, and it is the argument for the shipped
+  design rather than against it. The 60-day row predicts 13 October, inside the growing
+  season, where refusing to let a departure fall below its own soil is right. The 30-day row
+  predicts 12 November, after most of the harvest, where the same refusal is exactly wrong --
+  and the thing that removes it is the calendar-harvest zeroing this label-free variant had to
+  drop. What the curve measures is not skill against horizon LENGTH but skill against what is
+  being predicted, and it says the flat hold is a good rule for a standing crop and a bad one
+  for a harvested field. That is why the shipped rule carries a crop calendar.
+
 ==============================================================================
 VALIDATION  reserved optical, look-direction control, spatial coherence
 ==============================================================================
@@ -641,6 +686,98 @@ reserved-scene integrity: no module outside s2_ndvi/validate/figures names ndvi_
    Neighbouring fields share soil, water and management, so positive I on the forecast is expected.
    Positive I on the residual means real spatial structure the crop label alone does not carry;
    I near zero would mean the residual is plot-level noise.
+
+==============================================================================
+SENTINEL-1 AUDIT  an independent C-band witness, validation only  [NETWORK]
+==============================================================================
+  reading the shipped C-band table, /Users/sumitjadhav/Hackathon/Round 3/kaggle_dataset/s1_per_farm.csv
+
+Sentinel-1 C-band audit -- 16 RTC passes 2025-06-12 to 2025-12-21, VV+VH, 10 m,
+an INDEPENDENT INSTRUMENT USED AS A WITNESS. It feeds no feature, no label and no forecast:
+if the village total moves, this module has leaked.
+  anchor: 2025-06-12, 2025-06-24 (pre-sowing, matching the X-band June anchor)
+
+[P14] PROJECTION AUDIT. The shipped model holds cotton's canopy flat from DOY 316 to DOY 380 and closes the other four crops by observation. CLAIM: over 15 Nov -> 21 Dec the cotton cohort's C-band VH departure declines by LESS than the median of the four annual cohorts, i.e. cotton is still carrying canopy after the others have gone. If cotton declines as fast as the annuals, the flat hold overstates cotton's season integral and the write-up must say by how much.
+     crop   n  2025-11-15  2025-11-27  2025-12-09  2025-12-21  change_db
+    Bajra 139      -1.106      -0.696      -1.202      -0.908      0.198
+   Cotton  62       1.741       1.750       1.570       2.726      0.985
+Groundnut 341      -0.486      -0.440      -0.716      -0.725     -0.239
+    Maize 313      -0.754      -0.612      -0.962      -0.553      0.201
+     Rice 111      -1.883      -1.788      -2.192      -2.466     -0.582
+  cotton +0.985 dB against an annual-cohort median of -0.020 dB over 36 days: HELD.
+  Cohorts still above their own June bare soil on 2025-12-21: 1 of 5 -- Cotton.
+  The four annuals are BELOW their own soil on every date after 12 November, which is what a
+  cleared field looks like, and cotton is the crop the model holds open. The flat hold is
+  therefore not optimistic here -- C-band says cotton did not decay across the window the
+  model declines to observe. What this does NOT establish is that the held level is the
+  right one: a rising cross-pol return late in cotton can be canopy, boll opening or structure,
+  and separating those needs a polarimetry this stack does not have.
+  Second-order, and unplanned: the 62 cotton plots stand 2.2-3.3 dB clear of every other
+  cohort on a DIFFERENT SENSOR at dates no module opened. That is an independent corroboration
+  of the tier-1 cotton label, after the reserved December optical at p = 1.26e-11.
+
+[P15] CROSS-BAND SIGN. `CANOPY_SIGN = +1` was measured against two Sentinel-2 scenes and nothing else. CLAIM: the 10 Oct -> 15 Nov change in C-band VH departure correlates POSITIVELY with the 13 Oct -> 12 Nov change in X-band departure. STATED IN ADVANCE: C-band VH at 5.6 cm cross-pol is not X-band HH at 3.1 cm, and the two respond to different parts of a canopy. A null here bounds how far the sign generalises; it does not falsify a sign measured directly at X-band.
+  C-band 2025-10-10 -> 2025-11-15 against X-band T4 -> T6: n = 813, rho = +0.248, p = 7.88e-13
+  Positive, so HELD -- and much weaker than the +0.569 the same construction scores at X-band
+  against optical. That was stated in advance as the expected shape: the sign generalises
+  across band and polarisation, and how far it generalises is now a number rather than an
+  assumption. It is corroboration of CANOPY_SIGN, not a second measurement of it.
+
+[P16] SAMPLING ADEQUACY. The competition supplies six dates and the model integrates them. CLAIM: a season integral built from all 16 C-band passes and one built from only the 6 C-band passes nearest the Capella dates rank the plots the same way, rho >= 0.8. This prices the structural limitation the whole submission rests on -- whether six acquisitions can carry a season integral at all -- and it is measurable without any ground truth.
+  13 passes against 6 over DOY 163-319 (2025-06-12, 2025-06-24, 2025-08-23, 2025-10-10, 2025-11-03, 2025-11-15):
+  n = 956, rho = +0.915, p < 1e-308 (underflows double precision), median |difference| = 0.268 dB
+  HELD against the pre-registered 0.8. Six acquisitions on the Capella calendar recover the
+  ranking a 13-pass integral gives over the same span, to a median 0.27 dB. This is the
+  closest thing available to a test of the competition's own premise, it needs no ground
+  truth, and it is measured on an instrument that had no part in building the model.
+  The honest caveat on all three: these are CONFIRMATIONS, and a confirmation is worth less
+  than a contradiction. Two of the three test whether this project's own design choices were
+  adequate, which is an easier question than the ones the ledger got wrong.
+
+==============================================================================
+PRE-REGISTRATION LEDGER
+==============================================================================
+
+pre-registration ledger: 17 claims written down before the data that could test
+them was opened -- 9 CONTRADICTED, 1 not met, 7 held.
+  #  stage  verdict       claim as it was written / what the measurement said
+   1  S1     held          A right-looking scene must displace opposite to a left-looking one under a geocoding height error
+                            -> T5 alone reverses sign across the height sweep
+   2  S2     held          Invariant built-up targets can carry a per-date radiometric offset
+                            -> held for T6 (+4.28 dB); REFUSED for T5, whose residual changes sign with brightness
+   3  S3     contradicted  A closing canopy attenuates the surface return at X-band HH, so peak canopy is the darkest date
+                            -> the sign is +1: greener is brighter
+   4  S4     contradicted  EXPECTED_SIGN = {Rice +1, Cotton -1, Maize -1, Bajra -1, Groundnut -1}
+                            -> +1 on all five (rho +0.569, n 813); four of five wrong, module rebuilt
+   5  S4     contradicted  A per-plot harvest DOY can be recovered from the canopy curve
+                            -> 'standing' plots were the LEAST green, one-sided p = 1.00; deleted
+   6  S5     contradicted  The parcels above 1.5 dB on all three canopy dates are an orchard
+                            -> bare in June (0.247 vs 0.397, p = 1.1e-04) -- long-duration, not perennial
+   7  S5     not met       Six dates raise tier-1 label coverage above Round 2's 31.6 % of area
+                            -> 26.5 %, recorded as missed rather than met by loosening a threshold
+   8  S6     contradicted  A wet monsoon means an above-average season, so Y_ref adjusts upward
+                            -> Gujarat kharif rice -29 % and bajra -26 %: five-year lows in an excess-rain season
+   9  S8     contradicted  The fitted senescence limb beats persistence at a 30-day horizon
+                            -> +0.284 became -0.409 once every predictor was handed the district drift; deleted
+  10  S9     held          Cotton is the greenest of the five on the reserved 12 December scene
+                            -> 0.690 against 0.499-0.532, one-sided p = 1.26e-11
+  11  S9     held          Plot orientation does not drive t5_anomaly (|rho| < 0.2)
+                            -> rho = -0.051, p = 0.195, n = 650
+  12  S15    contradicted  Re-ranking tier 2 on the signed departure separates the cohorts better on residualised NDVI
+                            -> the test residualised against the wrong axis; corrected, p = 0.43 while the tier-1 control passes at p = 0.005
+  13  S15    contradicted  t5_anomaly orders the tier-2 cohorts Bajra > Maize > Groundnut, most soil-exposed first
+                            -> medians run Maize +0.82, Groundnut +0.55, Bajra +0.36 dB
+  14  S32    contradicted  Skill against persistence is non-positive at every horizon and decays as the horizon lengthens
+                            -> +0.140 [+0.071, +0.202] at 60 days and -0.180 [-0.330, -0.056] at 30 -- positive at the LONGER horizon; the driver is phenology, not horizon length
+  15  S33    held          C-band: cotton's canopy declines LESS than the annual cohorts over 15 Nov - 21 Dec, the window the model holds flat
+                            -> cotton +0.985 dB against an annual median of -0.020; the only cohort above its own June soil on 21 Dec
+  16  S33    held          C-band: the 10 Oct - 15 Nov change correlates POSITIVELY with the X-band T4 - T6 change
+                            -> rho = +0.248, n = 813 -- positive, and far weaker than the +0.569 the same construction scores at X-band
+  17  S33    held          C-band: a season integral from 6 passes on the Capella calendar ranks plots like one from every pass, rho >= 0.8
+                            -> rho = +0.915, n = 956, median difference 0.27 dB over the same DOY span
+  No entry above has been edited to agree with a later measurement. Four of the contradicted
+  claims deleted a term, a rule or a whole module, and the twelfth deleted a result this
+  project had already published.
 
 ==============================================================================
 PHASE 7  aggregation and the shipped tables
@@ -743,6 +880,7 @@ wrote /Users/sumitjadhav/Hackathon/Round 3/figures/reserved_optical.png
 wrote /Users/sumitjadhav/Hackathon/Round 3/figures/zone_map.png
 wrote /Users/sumitjadhav/Hackathon/Round 3/figures/village_summary.png
 wrote /Users/sumitjadhav/Hackathon/Round 3/figures/uncertainty_budget.png
+wrote /Users/sumitjadhav/Hackathon/Round 3/figures/ledger.png
 
 DONE   peak RSS 0 MB
 EXIT 0

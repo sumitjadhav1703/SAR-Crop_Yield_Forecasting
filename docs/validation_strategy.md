@@ -34,6 +34,41 @@ What the back-test does establish is narrower and still worth having:
   of a flooded specular surface is the hardest thing in this stack to extrapolate;
 - it **deleted a rule**. See §5.
 
+## 1b. The same back-test at every horizon the stack supports
+
+One point is not a curve, and "the rule does not beat persistence" invites the obvious next
+question: at what range does it stop working? `backtest.horizon_curve` runs the same
+experiment at both splits the six dates admit, on the departure target, where the scene-level
+bare-soil drift is already removed per date.
+
+Label-free predictors only. Round 2's labels have seen T4, so at a hold-T3-predict-T4 split
+they leak the target. Dropping them also removes B4's calendar-harvest zeroing, so the 30-day
+row below is **not** the shipped −0.119 — it is the same rule with its calendar taken away.
+
+| fit | predict | days | predictor | RMSE (dB) | skill | 95 % CI |
+|---|---|---:|---|---:|---:|---|
+| T3 | T4 | 60 | persistence | 1.553 | +0.000 | — |
+| T3 | T4 | 60 | **flat hold, no calendar** | **1.440** | **+0.140** | **[+0.071, +0.202]** |
+| T3–T4 | T6 | 30 | persistence | 1.217 | +0.000 | — |
+| T3–T4 | T6 | 30 | **flat hold, no calendar** | **1.322** | **−0.180** | **[−0.330, −0.056]** |
+| T3–T4 | T6 | 30 | linear extrapolation | 1.611 | −0.751 | [−0.895, −0.610] |
+
+**The pre-registration was that skill would be non-positive everywhere and decay with
+horizon. It is positive at the longer horizon and negative at the shorter one, and neither
+interval contains zero.** Ledger entry 14.
+
+The mechanism is phenological rather than temporal, and it argues *for* the shipped design.
+The 60-day row predicts 13 October, inside the growing season, where refusing to let a
+departure fall below its own soil is the right behaviour. The 30-day row predicts 12
+November, after most of the harvest, where the same refusal is exactly wrong — and what
+removes it is the calendar-harvest zeroing this label-free variant had to drop. So the curve
+does not measure skill against horizon *length*; it measures skill against what is being
+predicted, and it says the flat hold is a good rule for a standing crop and a bad one for a
+harvested field. That is why the shipped rule carries a crop calendar.
+
+Note also that T1 and T2 cannot anchor a horizon: they *are* the June anchor, both
+pre-sowing, so there is no canopy to persist and no `departure_T1` exists to carry forward.
+
 ## 2. Held-out optical
 
 Two Sentinel-2 scenes reserved from the start — 12 December 2025 and 16 January 2026 — read
@@ -103,6 +138,72 @@ The first two are expected — neighbouring fields share soil, water and managem
 is the informative one: after conditioning on the crop label there is still real spatial
 structure left. Had it been near zero, the residual would be plot-level speckle and the
 forecast would be five numbers with noise on top.
+
+## 4b. An independent instrument, used as a witness
+
+`src/s1_audit.py`. Sixteen Sentinel-1 IW RTC passes over Sokhda, 12 June – 21 December 2025,
+VV+VH at 10 m, terrain-corrected to gamma0 — the same quantity and the same UTM 43N grid the
+Capella chain produces. Free and open Copernicus data, served anonymously by the Microsoft
+Planetary Computer and equally available from CDSE and ASF, so it meets the rule that
+external data be free to all participants. Cached to `work/s1_cache/` and the per-plot table
+ships, so the tests re-run with no network.
+
+**This is not the Sentinel-1 fusion Round 1 rejected.** That decision stands: 27 pixels per
+plot at 10 m, and the fusion measured negative on this AOI. What was rejected was C-band as a
+per-plot *feature*. This module feeds nothing — no feature, no label, no forecast — and
+`tests/test_pipeline.py::test_s1_audit_is_not_imported_by_any_model_module` fails if any
+module in the chain imports it. If the village total ever moves when this module is present,
+the independence is gone and the change is wrong.
+
+Three claims, written into `s1_audit.PREREG` before a single Sentinel-1 pixel was read.
+
+**P14 — the projection audit, and it is the one that matters.** The shipped model holds
+cotton's canopy flat from 12 November to its calendar harvest at DOY 380. That assumption
+carries 56 % of cotton's canopy-days and 73.8 t, and **nothing else in this submission
+observes that window at all** — the last Capella pass is the last observation of any kind.
+Sentinel-1 flew on 15 Nov, 27 Nov, 9 Dec and 21 Dec.
+
+| cohort | 15 Nov | 27 Nov | 9 Dec | 21 Dec | change |
+|---|---:|---:|---:|---:|---:|
+| **Cotton** | **+1.741** | **+1.750** | **+1.570** | **+2.726** | **+0.985** |
+| Bajra | −1.106 | −0.696 | −1.202 | −0.908 | +0.198 |
+| Groundnut | −0.486 | −0.440 | −0.716 | −0.725 | −0.239 |
+| Maize | −0.754 | −0.612 | −0.962 | −0.553 | +0.201 |
+| Rice | −1.883 | −1.788 | −2.192 | −2.466 | −0.582 |
+
+Cotton is the only cohort above its own June bare soil on any date after 12 November, and it
+is 2.2–3.3 dB clear of every other cohort throughout. **Held.** The flat hold is not
+optimistic here — C-band says cotton did not decay across the window the model declines to
+observe.
+
+What this does *not* establish is that the held level is the right one. A rising cross-pol
+return late in cotton can be canopy, boll opening or structural change, and separating those
+needs a polarimetry this stack does not have.
+
+Unplanned, and worth more than the test it came from: those 62 cotton plots separate on a
+**different sensor**, on dates no module had opened. That is a second independent
+corroboration of the tier-1 cotton label, after the reserved December optical at p = 1.26e-11.
+
+**P15 — cross-band sign.** `CANOPY_SIGN = +1` rests on two Sentinel-2 scenes and nothing
+else. The 10 Oct → 15 Nov change in C-band VH against the 13 Oct → 12 Nov change in X-band
+departure: rho = **+0.248**, n = 813. Positive, so **held** — and far weaker than the +0.569
+the same construction scores at X-band against optical, which was stated in advance as the
+expected shape. The sign generalises across band and polarisation, and how far it generalises
+is now a number instead of an assumption. This is corroboration of the sign, not a second
+measurement of it.
+
+**P16 — sampling adequacy, and it prices the competition's own premise.** Six acquisitions
+have to carry a season integral. Nothing in the Capella stack can test whether six is enough,
+because six is all there is. C-band can: build the integral from every pass over DOY 163–319,
+then from only the six passes nearest the Capella dates, over the same span.
+
+rho = **+0.915**, n = 956, median difference **0.27 dB**. **Held** against the pre-registered
+0.8. Six acquisitions on this calendar recover the ranking a 13-pass integral gives. The
+test needs no ground truth and runs on an instrument that had no part in building the model.
+
+**The honest caveat on all three: these are confirmations, and a confirmation is worth less
+than a contradiction.** Two of the three test whether this project's own design choices were
+adequate, which is an easier question than the ones the ledger got wrong.
 
 ## 5. Things that were killed by their own validation
 

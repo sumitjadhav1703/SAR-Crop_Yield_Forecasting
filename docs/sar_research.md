@@ -51,6 +51,63 @@ The practical consequence was large. The model had originally been built sign-ag
 `|departure|`, which scored **rho = −0.085** against optical — measurably empty. Rebuilt on
 the measured signed departure, the season integral scores **+0.564**.
 
+## Two published results this project was calibrated against, read late
+
+Added 2026-09-02. Both were found after the model was fixed, so neither influenced a design
+decision — they are stated here as external checks on choices already made, and one of them
+partly answers the standing criticism of X-band that §"What was rejected" could only answer
+by measurement.
+
+### Inoue, Sakaiya & Wang 2014 — X-band σ⁰ against rice canopy variables
+
+*Potential of X-Band Images from High-Resolution Satellite SAR Sensors to Assess Growth and
+Yield in Paddy Rice.* **Remote Sensing 6(7):5995.** doi:10.3390/rs6075995. COSMO-SkyMed and
+TerraSAR-X over paddy.
+
+Two findings bear directly on this submission.
+
+**Among all the canopy biophysical variables tested, panicle biomass was the one best
+correlated with X-band σ⁰**, and the paper concludes X-band SAR is "promising for direct
+assessments of rice grain yields at regional scales" while having "limited capability to
+assess the whole-canopy variables". That is the standing X-band criticism stated precisely:
+poor for LAI and whole-canopy biomass, and *not* poor for the yield-bearing organ. This
+project's target is yield, not LAI. It does not make the saturation objection go away — our
+own six-bin NDVI test is what bounds that here — but it means the objection is aimed at a
+retrieval this model never attempts.
+
+**The paper's normalisation is the one this project arrived at independently.** Finding a
+6.6 dB systematic offset between the two sensors, it proposes an image-based "water-point"
+approach: difference each target against a reference surface *within the same image*, because
+absolute σ⁰ is not consistent between sensors or images. Our departure-from-own-June-bare-soil
+anchor is the same manoeuvre with bare soil as the reference instead of open water. The
+convergence is worth stating because the anchor is otherwise the least externally supported
+choice in the chain.
+
+**Caveat, and it is not small.** Inoue is VV at shallow incidence over flooded paddy; this
+stack is HH at 28.69–35.24° over a mixed rainfed smallholder system. The normalisation
+argument transfers cleanly. The panicle result transfers only as far as rice.
+
+### Prashnani & Justice 2026 — SAR phenological metrics over Central Indian smallholdings
+
+*Evaluating SAR-Derived Phenological Metrics for Monsoon (Kharif) Crop Monitoring in
+Diversified Agricultural Systems: Insights from Central India.* **Remote Sensing 18(8):1238.**
+doi:10.3390/rs18081238. Sentinel-1, 2021 season, five agroclimatic zones, cotton / rice /
+maize / soybean / urad — four of our five crops, the same cropping system, the same country.
+
+This is the closest published analogue to the labelling problem here, and it corroborates
+three separate choices:
+
+| what it reports | what it corroborates here |
+|---|---|
+| "cotton showing extended phenology and cereal–legume crops displaying compressed, overlapping growth patterns" | the tier-1 cotton rule is `canopy_end_db ≥ 1.5 dB` on 12 November — the crop still standing when the rest has been cleared. Extended phenology *is* the discriminant. |
+| multiclass **48.3 % overall accuracy with systematic cereal–legume confusion, reflecting fundamental phenological convergence among monsoon-aligned crops** | we claim measured labels for **26.5 % of area** and allocate the residual from the district mix, marked as allocated. Against a published ceiling of 48.3 % on the same crop system, that split is calibrated rather than timid. |
+| cross-district transferability highest for **rice (74 %) and cotton (72 %)**, the rest lower "due to their phenological similarity" | rice and cotton are **exactly** our two tier-1 crops, and the three we refuse to claim are exactly the three that do not transfer. Independently derived, on different data, in a different state. |
+| **AUC25 beat AUC50 and AUC75**, "capturing cumulative backscatter across the broader growing season while remaining robust to soil- and residue-dominated backscatter variability at sowing and harvest" | the model's one per-plot term is a cumulative season integral rather than a peak or a threshold crossing. |
+| VH dominated duration and integration metrics; VV dominated intensity metrics | this stack is HH only, so neither is available. Recorded as a limitation of the supplied data, not of the method. |
+
+The last row is the honest counterweight: their integration-based metrics work best in the
+polarisation this competition's data does not have.
+
 ## Radiometric normalisation across incidence angle
 
 `gamma0 = sigma0 / cos(theta)` is the right first-order normalisation for a rough surface.

@@ -53,6 +53,7 @@ MODULES = [
     "yield_forecast",
     "backtest",
     "validate",
+    "s1_audit",
     "submit",
     "figures",
     "pipeline",

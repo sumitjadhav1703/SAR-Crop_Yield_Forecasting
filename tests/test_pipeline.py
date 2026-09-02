@@ -709,3 +709,124 @@ def test_tier2_axis_ranks_plots_the_clipped_axis_cannot():
     assert lab.nunique() > 1, "the ranking axis is degenerate over this block"
     assert lab.loc[df.departure_T6.idxmin()] == crop_type.TIER2_ORDER[0]
     assert lab.loc[df.departure_T6.idxmax()] == crop_type.TIER2_ORDER[-1]
+
+
+# ---------------------------------------------------------------- the null model
+def test_the_null_span_removes_the_radar_entirely():
+    """`centred_factor` at span 0 must be exactly 1.0, or the ablation is not an ablation.
+
+    `accum_span_sensitivity` reports the null model as the span-0 row of the same sweep
+    rather than as a separate code path, which is only honest if span 0 really does collapse
+    the response to unity. If a future edit gave the factor an intercept, the ablation would
+    quietly become "the shipped model with a narrow span" and would still look plausible.
+    """
+    from yield_forecast import centred_factor
+
+    rng = np.random.default_rng(7)
+    x = rng.normal(size=400)
+    groups = np.array(["Maize", "Rice"] * 200)
+    assert np.all(centred_factor(x, groups, 0.0) == 1.0)
+    assert not np.all(centred_factor(x, groups, 0.30) == 1.0)
+
+
+# ---------------------------------------------------------------- the C-band witness
+def test_s1_audit_is_not_imported_by_any_model_module():
+    """Sentinel-1 is a witness here, never a feature, and a convention is not a control.
+
+    Round 1 measured C-band fusion as negative on this AOI at 27 pixels per plot, and that
+    decision stands. `s1_audit` exists to test the model from outside it, so the moment any
+    module in the forecast chain imports it, the independence the three P14-P16 claims rest
+    on is gone -- and it would go silently, because the numbers would still look fine.
+
+    `pipeline` is exempt: it is the runner, it calls the report after the forecast is
+    already computed, and it passes nothing back.
+    """
+    src = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src")
+    offenders = []
+    for name in sorted(os.listdir(src)):
+        if not name.endswith(".py") or name in ("s1_audit.py", "pipeline.py"):
+            continue
+        with open(os.path.join(src, name)) as fh:
+            for i, line in enumerate(fh, 1):
+                if "s1_audit" in line and not line.lstrip().startswith("#"):
+                    offenders.append(f"{name}:{i}")
+    assert not offenders, ("the C-band audit is validation-only and these import it: "
+                           f"{offenders}")
+
+
+def test_the_ledger_tally_is_derived_and_not_typed():
+    """The write-up says "nine of seventeen". That count has to come from the tuple.
+
+    The ledger is printed by the run, drawn in the gallery and quoted in the write-up. If
+    the count were typed in any of those three, adding a fourteenth claim would leave two of
+    them stating the old number and only a careful reader would catch it.
+    """
+    import validate
+
+    verdicts = {e[4] for e in validate.LEDGER}
+    assert verdicts <= {"held", "contradicted", "not met"}, verdicts
+    assert len(validate.LEDGER) == 17
+    assert sum(1 for e in validate.LEDGER if e[4] == "contradicted") == 9
+    assert sum(1 for e in validate.LEDGER if e[4] == "not met") == 1
+    assert len({e[0] for e in validate.LEDGER}) == len(validate.LEDGER)
+
+
+def test_the_cband_table_ships_so_kaggle_needs_no_refetch(tmp_path, monkeypatch):
+    """`work/` is gitignored, so the C-band table has to ship or Kaggle re-fetches 32 rasters.
+
+    Precedence is `work/` first and the shipped copy second, and that order is the point: it
+    is a derived artefact, so a change to the zonal method must take effect on a local run
+    rather than being masked by a stale shipped file. This asserts both halves.
+    """
+    import s1_audit
+
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    assert os.path.exists(os.path.join(root, "kaggle_dataset", "s1_per_farm.csv")), \
+        "the shipped C-band table is missing; Kaggle would re-fetch every raster"
+
+    calls = []
+    monkeypatch.setattr(s1_audit, "search", lambda: calls.append("network") or [])
+    monkeypatch.setattr(s1_audit, "_cache_dir", lambda: str(tmp_path / "work" / "s1_cache"))
+    (tmp_path / "work" / "s1_cache").mkdir(parents=True)
+
+    df = s1_audit.per_farm_table()
+    assert not calls, "the shipped table was ignored and the network was reached"
+    assert len(df) == 966
+    assert len(s1_audit.dates(df)) == 16
+
+
+def test_the_cband_table_is_found_where_kaggle_mounts_it(tmp_path, monkeypatch):
+    """On Kaggle the table arrives as an attached dataset, not at a repo path.
+
+    `s1_audit` first looked only at `<repo>/kaggle_dataset/`, which does not exist on Kaggle,
+    so the module would have found nothing, gone to the network and re-fetched 32 rasters in
+    the middle of a judged run. `round2_crops_path` already solved this and the resolver for
+    this table has to search the same three mount depths -- a dataset does not always land at
+    `/kaggle/input/<slug>/`.
+    """
+    import geocode
+
+    for depth in ("ds", "ds/owner", "ds/owner/slug"):
+        mount = tmp_path / depth
+        mount.mkdir(parents=True, exist_ok=True)
+        target = mount / "s1_per_farm.csv"
+        target.write_text("farm_id,vh_2025-06-12\n1,-8.0\n")
+        monkeypatch.setattr(geocode.glob, "glob",
+                            lambda pat, _m=str(mount): [str(target)] if "s1_per_farm" in pat else [])
+        assert geocode.s1_table_path() == str(target), f"not found at depth {depth}"
+        target.unlink()
+
+
+def test_a_missing_cband_table_recomputes_rather_than_raising(monkeypatch):
+    """The table is a cache of a derived quantity, so its absence must not stop the run.
+
+    This is the one place the resolver deliberately differs from `round2_crops_path`, which
+    raises: Round 2's labels are an INPUT and the back-test cannot run without them, but this
+    table can always be recomputed from the rasters for the identical answer. Raising here
+    would turn a slow path into a dead one.
+    """
+    import geocode
+
+    monkeypatch.setattr(geocode.glob, "glob", lambda pat: [])
+    monkeypatch.setattr(geocode.os.path, "isfile", lambda p: False)
+    assert geocode.s1_table_path() is None

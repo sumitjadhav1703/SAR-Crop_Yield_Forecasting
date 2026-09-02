@@ -41,8 +41,8 @@ Two things the brief says that the files do not. It says an expanded set of vill
 village shapefile holds one polygon. It says the crop classification is carried forward; the
 farm shapefile has five fields and none is a crop. So we re-derived the labels.
 
-There is nothing to fit, so validation is the deliverable. Five of the predictions we wrote
-down before looking were contradicted by the data, and all five are in this talk.""",
+There is nothing to fit, so validation is the deliverable. Seventeen predictions were written
+down before the data that could test them was opened, and nine were contradicted.""",
     ),
     dict(
         figure="sar_composite",
@@ -112,17 +112,15 @@ We aimed to raise tier-1 coverage above Round 2's 31.6 percent. We did not: 26.5
 target. What improved is stability -- tier-1 is 100 percent stable across every clustering
 setting, where Round 2's could halve.
 
-Two defects, one found by Kaggle and one by an audit of ourselves. The ranking axis for
-the allocated remainder was the November canopy clipped at zero, so 403 of 793 plots sat at
-exactly zero and sort order decided the bajra-maize cut. Two machines, same code, 39 plots
-different. The signed departure separates that block across 392 values.
+Two defects, one found by Kaggle and one by an audit of ourselves. The ranking axis for the
+allocated remainder was the November canopy clipped at zero, so 403 of 793 plots sat at exactly
+zero and sort order decided the bajra-maize cut. Two machines, same code, 39 plots different.
+The signed departure separates that block across 392 values.
 
-We then claimed the re-ranked cohorts agreed better with optical data, and reported that
-confirmed. They do not. An audit we ran on our own submission found the test still removing
-the axis from before the fix, through a default argument in another module. Corrected, tier-2
-labels carry no optical information beyond their own axis while the tier-1 control does. The
-test works, and it says tier 2 is an allocation -- which is what this slide has called it all
-along.""",
+We then reported the re-ranking confirmed by optical data. It is not. Our own audit found the
+test still residualising against the axis from before the fix. Corrected, tier-2 labels carry
+no optical information beyond their own axis while the tier-1 control does. Tier 2 is an
+allocation, which is what this slide has called it all along.""",
     ),
     dict(
         figure="model_chain",
@@ -154,14 +152,12 @@ percent, plus or minus 89 tonnes. The district crop mix, which allocates three o
 cohorts, 62. Round 2's labels 7, speckle 3, tie ordering zero.
 
 The mix is the row worth explaining, because we can score it against itself. Rice and cotton
-are assigned by threshold rules, not by the mix. The district says rice is 26 percent of area;
-we measure 17. It says cotton is 32; we measure 10. It overstates both, and the spread of that
-disagreement is what we use to perturb the three crops we cannot check.
+are assigned by threshold rules, not by the mix. The district says rice is 26 percent of area
+and cotton 32; we measure 17 and 10. It overstates both, and that disagreement is what we use
+to perturb the three crops we cannot check.
 
-External assumptions, 151 tonnes. Everything the radar contributes, 9.5. That is a harder
-statement than the one we made a week ago, when this table priced the reference and left the
-crop mix out. Somebody else's numbers decide where the line is and how big three of the five
-cohorts are.""",
+External assumptions, 151 tonnes. Everything the radar contributes, 9.5. Somebody else's
+numbers decide where the line is and how big three of the five cohorts are.""",
     ),
     dict(
         figure="extrapolation",
@@ -174,8 +170,12 @@ replaces the discount with measurement, because the stack now contains the harve
 of the five crops.
 
 Cotton is the only crop whose season runs past the 12th of November, and the only one with a
-projected share: 56 percent of its canopy-days. That ships per plot. A cotton plot more than
-half projection is not the same claim as a fully observed bajra plot.
+projected share: 56 percent of its canopy-days. That ships per plot.
+
+Nothing in our data observes that window, so we went and found something that does. Sixteen
+free Sentinel-1 passes, feeding no feature and no label. Cotton is the only cohort still above
+its own June bare soil after the 12th of November, and it rises nearly a decibel through to
+the 21st of December. The flat hold is not optimistic. That was written down before we looked.
 
 The projection is flat -- last observed canopy carried forward. That is not the rule we
 started with, and the next slide is why.""",
@@ -231,18 +231,16 @@ spreading 1.50 to 2.80 tonnes per hectare around a village figure of 2.00. The v
 the sum of the shipped plot file, rounded once before aggregating -- our own cross-check
 caught a 0.0015 tonne discrepancy.
 
-And the roll-up is gated on the village geometry, not the village name: 962 of 966 plots agree
+The roll-up is gated on the village geometry, not the village name: 962 of 966 plots agree
 with the attribute, none disagree, and all 447 hectares sit inside a boundary enclosing 1174.
-So we are reporting 38 percent of Sokhda -- its digitised farmland, not the village. A groupby
-on a text column is an assumption; this is what makes it a claim.
+So we report 38 percent of Sokhda -- its digitised farmland, not the village.
 
 What we do not claim. Tier-1 covers a quarter of the area, below Round 2, a missed target.
 Median peak canopy is 0.77 decibels: real, corroborated, small. X-band is supposed to saturate
-early with biomass, and that is the first question we expect from this room -- across six NDVI
-bins here the departure rises monotonically and the increment does not collapse, so over the
-range these fields occupy it does not saturate. Plot-level irrigation could produce the same
-green-and-bright correlation as canopy scattering. And our projection is no better than
-persistence.
+early, and that is the first question we expect from this room -- across six NDVI bins the
+departure rises monotonically, so over the range these fields occupy it does not saturate.
+Plot-level irrigation could produce the same green-and-bright correlation as canopy scattering.
+And our projection is no better than persistence.
 
 Thank you.""",
     ),

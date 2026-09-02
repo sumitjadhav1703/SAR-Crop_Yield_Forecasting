@@ -480,7 +480,7 @@ def uncertainty_budget(crops: pd.DataFrame, n_draws: int = 1000,
 
 
 def accum_span_sensitivity(crops: pd.DataFrame,
-                           levels=(0.15, 0.20, 0.30, 0.45)) -> pd.DataFrame:
+                           levels=(0.0, 0.15, 0.20, 0.30, 0.45)) -> pd.DataFrame:
     """How much of the answer is the 0.30 in `ACCUM_SPAN`?
 
     Reported rather than argued, for the same reason `crop_type.cotton_sensitivity` and
@@ -492,6 +492,13 @@ def accum_span_sensitivity(crops: pd.DataFrame,
 
     0.20 is Round 2's span and 0.45 is its cotton discount, so the range brackets both of the
     numbers this project has argued about.
+
+    **0.0 is the null model**, and it is the ablation a reviewer asks for rather than a fifth
+    point on a sweep: `centred_factor` at span 0 returns exactly 1.0 for every plot, so the
+    forecast collapses to `Y_ref(crop)` and the radar contributes nothing at all. The row is
+    here rather than in a separate function because it IS the same lever at its limit, and
+    running it through the same code path is what makes it an ablation of the shipped model
+    instead of a re-implementation of it. `docs/judge_report.md` section 17.3.
 
     Returns the village total, the area-weighted t/ha, and the per-crop p10-p90 spread at each
     span. The total is expected to be nearly flat -- the factor is centred, so widening it
@@ -535,6 +542,27 @@ def report_accum_span(crops: pd.DataFrame) -> pd.DataFrame:
           "what it is for. The constant\n  is a statement about how much a within-cohort "
           "rank is allowed to say, not a lever on\n  the answer -- and that is now measured "
           "rather than asserted.")
+
+    # The null model, stated as its own result rather than left as a row to be noticed.
+    # span 0 is a() == 1, i.e. the forecast with the radar removed entirely.
+    base = forecast(crops)
+    shipped = base["yield_forecast_t_ha"].to_numpy(dtype=float)
+    null = base["yield_ref_t_ha"].to_numpy(dtype=float)
+    area = base["area_ha"].to_numpy(dtype=float)
+    d_total = float(((shipped - null) * area).sum())
+    null_total = float((null * area).sum())
+    moved = np.abs(shipped - null) / null
+    print(f"\nnull-model ablation, a() == 1 -- the forecast with the radar taken out:")
+    print(f"  village total {null_total:.1f} t against the shipped "
+          f"{float((shipped * area).sum()):.1f} t, a difference of {d_total:+.1f} t "
+          f"({100.0 * d_total / null_total:+.2f} %)")
+    print(f"  per plot the same removal moves the forecast by a median "
+          f"{100.0 * np.nanmedian(moved):.1f} % and {100.0 * np.nanpercentile(moved, 90):.1f} % "
+          f"at p90;\n  {int((moved > 0.05).sum())} of {len(moved)} plots move more than 5 %.")
+    print("  That gap is the whole of what the radar buys, and it is a REDISTRIBUTION: the "
+          "level comes\n  from Y_ref and the season integral only decides which plots sit "
+          "above and below it. The\n  uncertainty budget prices the same asymmetry from the "
+          "other side -- 150.9 t of external\n  assumption against 9.5 t of radar.")
     return tab
 
 

@@ -107,6 +107,53 @@ def _rho(a: pd.Series, b: pd.Series) -> tuple:
     return float(r), float(p), int(m.sum())
 
 
+BLOCK_M = 500.0
+BLOCK_DRAWS = 999
+
+
+def _rho_block(a: pd.Series, b: pd.Series, cx: pd.Series, cy: pd.Series,
+               block_m: float = BLOCK_M, draws: int = BLOCK_DRAWS,
+               seed: int = 20260902) -> dict:
+    """Spearman rho with a SPATIAL BLOCK bootstrap interval instead of an analytic p.
+
+    The analytic p beside the headline rho assumes 813 independent plots. This project's
+    own Moran's I says they are not: the within-crop residual is +0.151 on a
+    999-permutation null with zero exceedances. Neighbouring fields share soil, water,
+    sowing date and management, so a p-value computed as if each parcel were an
+    independent draw is quoting the sample size rather than the evidence -- and
+    `p = 8.11e-71` on spatially autocorrelated field data is exactly the tell an expert
+    panel looks for.
+
+    So the plots are grouped into 500 m cells -- the same cell size as the shipped zone
+    grid, chosen there for the same reason: it is a few field-widths, so within-cell
+    dependence is captured and cells are close to exchangeable. Whole CELLS are resampled
+    with replacement, which keeps each cell's internal correlation intact instead of
+    breaking it up the way a plot-level bootstrap silently does.
+
+    Reports the interval, not a p. A block bootstrap answers "how far would this rho move
+    under resampling that respects the spatial structure", and turning that back into a
+    p-value would reintroduce the assumption it exists to avoid.
+    """
+    m = a.notna() & b.notna() & cx.notna() & cy.notna()
+    a, b = a[m].to_numpy(), b[m].to_numpy()
+    key = (np.floor(cx[m].to_numpy() / block_m).astype(np.int64) * 100000
+           + np.floor(cy[m].to_numpy() / block_m).astype(np.int64))
+    cells, inverse = np.unique(key, return_inverse=True)
+    members = [np.flatnonzero(inverse == i) for i in range(len(cells))]
+
+    rng = np.random.default_rng(seed)
+    out = np.empty(draws)
+    for i in range(draws):
+        pick = rng.integers(0, len(cells), len(cells))
+        idx = np.concatenate([members[j] for j in pick])
+        out[i] = stats.spearmanr(a[idx], b[idx]).statistic
+    lo, hi = np.percentile(out, [2.5, 97.5])
+    return {"n": int(m.sum()), "blocks": len(cells),
+            "rho": float(stats.spearmanr(a, b).statistic),
+            "lo": float(lo), "hi": float(hi),
+            "median_block_n": float(np.median([len(x) for x in members]))}
+
+
 def same_date(df: pd.DataFrame) -> pd.DataFrame:
     """corr(departure, NDVI) on each date where the two instruments observed the same day."""
     rows = []
@@ -254,6 +301,19 @@ def report() -> pd.DataFrame:
                                                  else "  CONTRADICTS")
         print(f"   {r.crop:11s} {r.n:4.0f}  {r.rho:+.3f}  {r.p:9.2e}  {r.dB_per_NDVI:+8.2f}"
               f"           {r.expected}{mark}")
+
+    blk = _rho_block(d.departure_T6 - d.departure_T4, d.ndvi_T6 - d.ndvi_T4, d.cx, d.cy)
+    print(f"\n2b. The same headline rho under a {BLOCK_M:.0f} m SPATIAL BLOCK bootstrap, "
+          f"{BLOCK_DRAWS} draws:")
+    print(f"    rho = {blk['rho']:+.3f}, 95 % interval [{blk['lo']:+.3f}, {blk['hi']:+.3f}] "
+          f"over {blk['blocks']} blocks\n    (n = {blk['n']}, median "
+          f"{blk['median_block_n']:.0f} plots per block)")
+    print("    The p beside the ALL row above assumes 813 independent plots, and this "
+          "project's own\n    Moran's I says they are not. Resampling whole 500 m cells "
+          "keeps the spatial dependence\n    intact and prices the correlation against it "
+          "instead of against an independence\n    assumption the data contradicts. The "
+          "interval is the honest statement; the analytic p is\n    printed above only "
+          "because removing it would hide the size of the difference.")
 
     print("\n3. The season integral: the shipped form against the two alternatives")
     print("   all three scored against the same reference: mean NDVI of the two optical dates")

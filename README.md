@@ -62,7 +62,7 @@ validation is lost, and the run says so.
 ```sh
 python src/pipeline.py                    # full chain, ~15 min, writes outputs/ and figures/
 python src/pipeline.py --no-s2            # no network; forecast only, no external validation
-python -m pytest tests/ -q                # 46 tests
+python -m pytest tests/ -q                # 50 tests
 python build_notebook.py --check          # verify the notebook matches src/
 python audit_writeup.py --trace writeup.md   # every number traced to the shipped log
 ```
@@ -74,13 +74,14 @@ need `SAR_DATA_DIR` set too.
 
 ```
 src/                 the pipeline. 16 modules, executed in the order listed in pipeline.py
-tests/               46 tests, each one a defect that actually happened
+tests/               50 tests, each one a defect that actually happened
 docs/                methodology, validation strategy, leakage analysis, research log
+kaggle_dataset/      round2_crops.csv and s1_per_farm.csv, both found automatically
 outputs/             the three shipped tables: farm, village, zone
-figures/             the 14-figure gallery
+figures/             the 15-figure gallery, including the pre-registration ledger
 logs/pipeline_clean.log   the shipped run every number in the write-up is traced to
 writeup.md           the 2000-word submission
-AGENTS.md            the full development log, S0-S26. Long, and not required reading
+AGENTS.md            the full development log, S0-S33. Long, and not required reading
 docs/judge_report.md an adversarial audit of this submission, including its own defects
 sokhda_yield_forecast.ipynb   GENERATED from src/ by build_notebook.py — never edit directly
 ```
@@ -93,12 +94,13 @@ the notebook cannot disagree; if they ever do, re-run `build_notebook.py`.
 Every number in `writeup.md` is printed by the run in `logs/pipeline_clean.log`, and
 `audit_writeup.py --trace` writes the token-to-log-line mapping to `logs/writeup_trace.txt`.
 
-Thirteen claims were written down before the data that could test them was opened; **eight
-were contradicted** and the model or the claim was changed to match. The ledger is at the top of
-[`docs/research_log.md`](docs/research_log.md). [`docs/judge_report.md`](docs/judge_report.md)
+Seventeen claims were written down before the data that could test them was opened; **nine
+were contradicted** and the model or the claim was changed to match. The ledger lives in the
+source as `validate.LEDGER`, is printed by every run, and is drawn as `figures/ledger.png`;
+the narrative is at the top of [`docs/research_log.md`](docs/research_log.md). [`docs/judge_report.md`](docs/judge_report.md)
 is a hostile audit of this submission that found further defects — two false claims in our own
 leakage analysis, a p-value that was a resolution floor, and a default argument that had
-silently invalidated one of the thirteen pre-registered tests. All are corrected in place and
+silently invalidated one of the pre-registered tests. All are corrected in place and
 recorded rather than quietly removed; §23 of that report tracks what is closed and what is not.
 
 ## Data licence

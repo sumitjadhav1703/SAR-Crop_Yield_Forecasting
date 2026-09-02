@@ -194,11 +194,29 @@ def run(with_s2: bool = True, make_figures: bool = True) -> pd.DataFrame:
 
     if with_s2:
         _phase("BACK-TEST  fit on T1-T4, predict the withheld 12 November pass")
-        backtest.report(backtest.frame())
+        bt = backtest.frame()
+        backtest.report(bt)
+        # The headline back-test is one point. This is the same experiment at every split
+        # the six dates support, and it contradicted its own pre-registration.
+        backtest.report_horizons(bt)
 
         _phase("VALIDATION  reserved optical, look-direction control, spatial coherence")
         ndvi = pd.read_csv(os.path.join(work, "farm_ndvi.csv"))
         validate.report(fc.merge(ndvi, on="farm_id", how="left"))
+
+        # An independent instrument, used as a witness and never as a feature. It runs
+        # AFTER the forecast on purpose: everything above has already been computed, so if
+        # a column from here ever reached the model the village total would move and the
+        # `test_s1_audit_is_not_imported` gate would not be the only thing that noticed.
+        _phase("SENTINEL-1 AUDIT  an independent C-band witness, validation only  [NETWORK]")
+        import s1_audit
+        s1_audit.report(work)
+
+        # The ledger last, because it is the summary of everything above it. Printed from
+        # here so `audit_writeup.py` can trace the write-up's "eight of thirteen" to a log
+        # line rather than to a document that could drift away from the constant.
+        _phase("PRE-REGISTRATION LEDGER")
+        validate.report_ledger()
 
     _phase("PHASE 7  aggregation and the shipped tables")
     farms, village, zones = submit.run(os.path.join(work, "farm_forecast_raw.csv"))

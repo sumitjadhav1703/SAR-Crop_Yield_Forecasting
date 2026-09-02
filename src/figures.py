@@ -28,6 +28,7 @@ from osgeo import gdal, ogr, osr
 from farm_features import FARM_SHP, VILLAGE_SHP
 import geocode
 import scene_diagnostics
+import validate
 from geocode import TARGET_EPSG
 
 CROPS = ["Rice", "Cotton", "Maize", "Bajra", "Groundnut"]
@@ -1033,6 +1034,63 @@ def village_summary(path: str, out_dir: str) -> None:
     plt.close(fig)
 
 
+def ledger(path: str) -> None:
+    """The pre-registration ledger: thirteen claims written before their test, and outcomes.
+
+    Reads `validate.LEDGER`, the same tuple `pipeline.run` prints into the shipped log, so
+    the figure, the log and the write-up's "eight of thirteen" cannot disagree. Nothing here
+    is re-typed and nothing is re-counted -- the tally at the top is computed from the tuple.
+
+    Built at 14.4 x 8.1 directly rather than padded: it is a table, so the layout is chosen
+    for 16:9 instead of rescued into it.
+    """
+    rows = validate.LEDGER
+    counts = {v: sum(1 for e in rows if e[4] == v)
+              for v in ("held", "contradicted", "not met")}
+    colour = {"held": "#2c7fb8", "contradicted": "#c0392b", "not met": "#b8860b"}
+    mark = {"held": "HELD", "contradicted": "CONTRADICTED", "not met": "NOT MET"}
+
+    fig = plt.figure(figsize=(14.4, 8.1))
+    ax = fig.add_axes([0.035, 0.045, 0.93, 0.775])
+    ax.axis("off")
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, len(rows))
+
+    for i, (n, stage, claim, outcome, verdict) in enumerate(rows):
+        y = len(rows) - i - 0.5
+        ax.add_patch(plt.Rectangle((0, y - 0.5), 1, 1.0, transform=ax.transData,
+                                   facecolor=colour[verdict], alpha=0.055,
+                                   edgecolor="#dddddd", linewidth=0.5))
+        ax.text(0.012, y, f"{n}", va="center", ha="left", fontsize=8.5, color="#666666")
+        ax.text(0.038, y, stage, va="center", ha="left", fontsize=8.5, color="#666666")
+        ax.text(0.075, y, mark[verdict], va="center", ha="left", fontsize=8.2,
+                weight="bold", color=colour[verdict])
+        ax.text(0.185, y + 0.21, claim, va="center", ha="left", fontsize=8.4,
+                color="#222222")
+        ax.text(0.185, y - 0.22, f"→  {outcome}", va="center", ha="left", fontsize=8.0,
+                color="#555555", style="italic")
+
+    fig.suptitle("Every claim written down before the data that could test it", fontsize=15,
+                 y=0.972)
+    fig.text(0.5, 0.912,
+             f"{counts['contradicted']} of {len(rows)} were CONTRADICTED, "
+             f"{counts['not met']} was not met, {counts['held']} held — and no entry has been "
+             f"edited to agree with a later measurement",
+             ha="center", fontsize=10.5, color="#222222")
+    fig.text(0.5, 0.878,
+             "There is no ground truth, no leaderboard and no scored metric here, so the only "
+             "thing that can keep a model honest is a record of what it predicted before it "
+             "looked.",
+             ha="center", fontsize=9, color="#444444")
+    fig.text(0.5, 0.851,
+             "Four of the contradicted claims deleted a term, a rule or a whole module. "
+             "The twelfth deleted a result this project had already published.",
+             ha="center", fontsize=9, color="#444444")
+    _footer(fig, "drawn from validate.LEDGER, the same tuple the shipped run prints")
+    fig.savefig(path, dpi=160)
+    plt.close(fig)
+
+
 def uncertainty_budget(path: str) -> None:
     """What the village total is worth, and which term owns the width.
 
@@ -1377,6 +1435,7 @@ def run() -> list:
         ("zone_map.png", lambda p: zone_map(df, patches, ids, p, outline)),
         ("village_summary.png", lambda p: village_summary(p, out_dir)),
         ("uncertainty_budget.png", lambda p: uncertainty_budget(p)),
+        ("ledger.png", lambda p: ledger(p)),
     ]
 
     made = []

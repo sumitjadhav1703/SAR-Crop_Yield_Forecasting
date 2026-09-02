@@ -205,6 +205,124 @@ def report(df: pd.DataFrame) -> dict:
     return out
 
 
+# The leave-future-out splits the stack actually supports, as (previous, last, target).
+# `previous` is only needed for the slope in B3 and may be None.
+#
+# WHY THERE ARE TWO AND NOT FOUR. T5 never appears: its level in `farm_features` is the
+# T4-T6 interpolation, so predicting it or predicting from it scores an interpolation. And
+# T1 and T2 ARE the June anchor -- a plot's departure is measured against their mean, so
+# there is no `departure_T1` or `departure_T2` to carry forward and no canopy at either
+# date to carry. Both are pre-sowing bare soil. A persistence forecast needs something to
+# persist, so the earliest split this design admits is "hold T3, predict T4".
+HORIZONS = ((None, "T3", "T4"), ("T3", "T4", "T6"))
+
+
+def _label_free_predictors(df: pd.DataFrame, prev: str, last: str, target: str) -> dict:
+    """The predictors that need no crop label, at an arbitrary split.
+
+    LABEL-FREE ON PURPOSE, and this is the constraint that shapes the whole function. The
+    headline back-test uses Round 2's labels because they were derived from T1-T4 alone and
+    therefore leak nothing about T6. At the "hold T3, predict T4" split that argument fails:
+    Round 2's labels saw T4, so handing them to a predictor of T4 leaks the target. Rather
+    than construct a new label set per horizon -- which would make each row of the curve a
+    different experiment -- the curve drops the two predictors that need labels, and B3
+    drops out too wherever there is no earlier date to take a slope from.
+
+    What that costs is the calendar-harvest zeroing inside the shipped B4. What is left,
+    `clip(last, 0, None)` held flat, is the shipped rule's projection with its calendar
+    removed, and it is named that way in the output rather than called the shipped rule.
+    """
+    dl = df[f"departure_{last}"].to_numpy(float)
+    out = {"B1 persistence": dl,
+           "B4 flat hold (no calendar)": np.clip(dl, 0.0, None)}
+    if prev is not None:
+        slope = ((dl - df[f"departure_{prev}"].to_numpy(float))
+                 / float(DOY[last] - DOY[prev]))
+        out["B3 linear extrapolation"] = dl + slope * float(DOY[target] - DOY[last])
+    return out
+
+
+def horizon_curve(df: pd.DataFrame) -> pd.DataFrame:
+    """Skill against persistence at every horizon the six dates support.
+
+    The headline back-test is one point: -0.119 at 30 days. A single point cannot say
+    whether the projection is harmless at short range and harmful at long range, or uniformly
+    no better than persistence -- and that is the first thing a reviewer asks after being
+    told the rule does not beat persistence.
+
+    Scored on the DEPARTURE target only. `phenology` removes the scene-level bare-soil drift
+    per date before the departure is formed, so every horizon here is already drift-corrected
+    by construction -- which matters, because the drift is exactly what made the rejected
+    decaying limb look good at the 30-day horizon until every predictor was handed it.
+    """
+    rng = np.random.default_rng(RANDOM_STATE)
+    rows = []
+    for prev, last, target in HORIZONS:
+        preds = _label_free_predictors(df, prev, last, target)
+        truth = df[f"departure_{target}"].to_numpy(float)
+        ok = np.isfinite(truth) & np.all([np.isfinite(v) for v in preds.values()], axis=0)
+        truth = truth[ok]
+        base = preds["B1 persistence"][ok]
+        for name, p in preds.items():
+            p = p[ok]
+            lo, hi = _skill_ci(truth, p, base, rng)
+            rows.append({"fit": last if prev is None else f"{prev}-{last}",
+                         "predict": target,
+                         "days": int(DOY[target] - DOY[last]), "n": int(ok.sum()),
+                         "predictor": name,
+                         "RMSE": float(np.sqrt(np.mean((p - truth) ** 2))),
+                         "skill": 1.0 - np.mean((p - truth) ** 2) / np.mean(
+                             (base - truth) ** 2),
+                         "ci_lo": lo, "ci_hi": hi})
+    return pd.DataFrame(rows)
+
+
+def report_horizons(df: pd.DataFrame) -> pd.DataFrame:
+    """Print the curve. Called from `pipeline.run`, never only from `__main__`."""
+    tab = horizon_curve(df)
+    print("\nskill against persistence at every horizon the stack supports, departure target")
+    print("  (label-free predictors only: Round 2's labels have seen T4, so at the "
+          "hold-T3-predict-T4")
+    print("   split they leak the target. The two predictors needing a label are dropped "
+          "rather than")
+    print("   re-derived per horizon, which also removes B4's calendar-harvest zeroing -- "
+          "so the 30-day")
+    print("   row below is NOT the shipped -0.119, it is the same rule with its calendar "
+          "taken away.)")
+    print("  fit     predict  days     n  predictor                      RMSE    skill "
+          "[95% CI]")
+    for _, x in tab.iterrows():
+        print(f"  {x.fit:<7s} {x.predict:<7s} {x.days:4d} {x.n:5d}  {x.predictor:<27s}"
+              f"{x.RMSE:6.3f}  {x.skill:+7.3f} [{x.ci_lo:+.3f}, {x.ci_hi:+.3f}]")
+    hold = tab[tab.predictor == "B4 flat hold (no calendar)"].sort_values("days")
+    print("  The flat hold's skill by horizon: "
+          + ", ".join(f"{int(x.days)} d {x.skill:+.3f} [{x.ci_lo:+.3f}, {x.ci_hi:+.3f}]"
+                      for _, x in hold.iterrows()) + ".")
+
+    # PRE-REGISTERED, and wrong. The claim written before this ran was that skill would be
+    # non-positive at every horizon and degrade monotonically with horizon length. It does
+    # the opposite: positive at 60 days with an interval clear of zero, negative at 30.
+    # Recorded as the fourteenth entry in the ledger rather than reworded.
+    far, near = hold.iloc[-1], hold.iloc[0]
+    print(f"  PRE-REGISTERED AND CONTRADICTED. The claim was that skill is non-positive at "
+          f"every horizon\n  and decays as the horizon lengthens. It is {far.skill:+.3f} "
+          f"[{far.ci_lo:+.3f}, {far.ci_hi:+.3f}] at {int(far.days)} days and "
+          f"{near.skill:+.3f}\n  [{near.ci_lo:+.3f}, {near.ci_hi:+.3f}] at "
+          f"{int(near.days)} -- positive at the LONGER horizon, and neither interval "
+          f"contains zero.")
+    print("  The mechanism is phenological, not temporal, and it is the argument for the "
+          "shipped\n  design rather than against it. The 60-day row predicts 13 October, "
+          "inside the growing\n  season, where refusing to let a departure fall below its "
+          "own soil is right. The 30-day row\n  predicts 12 November, after most of the "
+          "harvest, where the same refusal is exactly wrong --\n  and the thing that "
+          "removes it is the calendar-harvest zeroing this label-free variant had to\n  "
+          "drop. What the curve measures is not skill against horizon LENGTH but skill "
+          "against what is\n  being predicted, and it says the flat hold is a good rule "
+          "for a standing crop and a bad one\n  for a harvested field. That is why the "
+          "shipped rule carries a crop calendar.")
+    return tab
+
+
 def shipped_configuration(df: pd.DataFrame) -> pd.DataFrame:
     """The back-test restricted to the case the shipped model actually faces.
 

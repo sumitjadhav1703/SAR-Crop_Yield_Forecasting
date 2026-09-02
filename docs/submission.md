@@ -7,7 +7,7 @@
 | `outputs/farm_forecast.csv` | 966 | the plot forecast **and the chain that produced it** |
 | `outputs/village_summary.csv` | 6 | five crops plus ALL, area-weighted |
 | `outputs/zone_summary.csv` | 46 | 500 m cells with ≥ 5 farms |
-| `figures/*.png` | 12 | media gallery, all 16:9, `cover.png` is the required cover |
+| `figures/*.png` | 15 | media gallery, all 16:9, `cover.png` is the required cover |
 | `sokhda_yield_forecast.ipynb` | — | the public notebook, generated from `src/` |
 
 There is no prescribed schema this round — no `sample_submission.csv` exists. That removes a

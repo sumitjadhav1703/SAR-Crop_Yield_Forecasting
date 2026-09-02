@@ -1,7 +1,21 @@
 # Round 3 — SAR Crop Yield Forecasting — development log
 
-Running log, newest section appended at the bottom. Same discipline as Rounds 1 and 2:
-every number here is one a shipped run printed, and where it is a judgement it says so.
+**This file is not required reading, and it is not documentation.** It is the working log of
+how the submission was built, appended to as the work happened, newest section at the bottom.
+It is 120 KB. If you are assessing this project, read [`README.md`](README.md), then
+[`writeup.md`](writeup.md), then [`docs/validation_strategy.md`](docs/validation_strategy.md);
+those three are the submission. This file is here because a claim about process is worth
+nothing if the process cannot be inspected.
+
+**What it is useful for is checking whether the discipline this submission claims is real.**
+Every number in it was printed by a run, every prediction was written before the measurement
+that tested it, and where a measurement contradicted a prediction the entry records the
+contradiction instead of quietly rewriting the prediction. Eight of thirteen pre-registered
+claims were contradicted; the ledger is at the top of
+[`docs/research_log.md`](docs/research_log.md) and §S4 (the canopy sign) and §S9 (the
+perennial screen) are the two worth reading if you only read two. §S23–S24 are an adversarial
+audit of this submission finding defects in it, and §S30 is a false claim that survived three
+clean re-runs because no automated gate reads a rendered figure.
 
 ---
 
@@ -2150,3 +2164,241 @@ Only warnings are GDAL autocorrecting ring winding order in the competition's ow
 Kaggle's `mistune`/`nbconvert` `SyntaxWarning`s. None ours.
 
 Seven Kaggle runs, four of them after the audit; every one has reproduced the local log.
+
+### S32 — the back-test at every horizon, and a fifth pre-registration contradicted (2026-09-02)
+
+The headline back-test is one point: −0.119 at 30 days. A single point cannot distinguish
+"harmless at short range, harmful at long range" from "uniformly no better than persistence",
+and that is the first thing a reviewer asks after being told the rule does not beat
+persistence. `backtest.horizon_curve` runs the same experiment at every split the six dates
+admit.
+
+**Two splits, not three, and the reason is worth recording.** T1 and T2 *are* the June
+anchor: a plot's departure is measured against their mean, so there is no `departure_T1` to
+carry forward and no canopy at either date to carry — both are pre-sowing bare soil. A
+persistence forecast needs something to persist. T5 is excluded as always, its level being
+the T4–T6 interpolation. What is left is hold-T3-predict-T4 at 60 days and the shipped
+hold-T4-predict-T6 at 30.
+
+**Label-free predictors only.** Round 2's labels have seen T4, so at the 60-day split they
+leak the target. Dropping the two predictors that need labels also removes B4's
+calendar-harvest zeroing, so the 30-day row is **not** the shipped −0.119 — it is the same
+rule with its calendar taken away, and it is named that way in the output.
+
+```
+fit     predict  days     n  predictor                      RMSE    skill [95% CI]
+T3      T4        60   813  B1 persistence              1.553   +0.000
+T3      T4        60   813  B4 flat hold (no calendar)  1.440   +0.140 [+0.071, +0.202]
+T3-T4   T6        30   813  B1 persistence              1.217   +0.000
+T3-T4   T6        30   813  B4 flat hold (no calendar)  1.322   -0.180 [-0.330, -0.056]
+T3-T4   T6        30   813  B3 linear extrapolation     1.611   -0.751 [-0.895, -0.610]
+```
+
+**PRE-REGISTERED AND CONTRADICTED.** The claim written before this ran was that skill would
+be non-positive at every horizon and would decay as the horizon lengthened. It is **+0.140 at
+60 days and −0.180 at 30 — positive at the LONGER horizon**, and neither interval contains
+zero. Ledger entry 14.
+
+**The mechanism is phenological, not temporal, and it argues for the shipped design.** The
+60-day row predicts 13 October, inside the growing season, where refusing to let a departure
+fall below its own soil is right. The 30-day row predicts 12 November, after most of the
+harvest, where the same refusal is exactly wrong — and what removes it is the
+calendar-harvest zeroing the label-free variant had to drop. The curve therefore does not
+measure skill against horizon *length*. It measures skill against what is being predicted,
+and it says the flat hold is a good rule for a standing crop and a bad one for a harvested
+field. That is why the shipped rule carries a crop calendar, and it is the first evidence
+that the calendar earns its place.
+
+### S33 — an independent C-band witness, and the window nothing observed (2026-09-02)
+
+The model holds cotton's canopy flat from 12 November to DOY 380. That assumption carries
+56 % of cotton's canopy-days and 73.8 t, and **nothing in the submission observed that window
+at all** — the last Capella pass was the last observation of any kind. Sentinel-1 flew Sokhda
+on 15 Nov, 27 Nov, 9 Dec and 21 Dec 2025, and it is free.
+
+**What was used, and why it is not the fusion Round 1 rejected.** 16 Sentinel-1 IW RTC passes,
+12 Jun – 21 Dec 2025, VV+VH at 10 m, terrain-corrected to gamma0 on the same UTM 43N grid the
+Capella chain produces. Anonymous SAS from the Microsoft Planetary Computer; the same data is
+on CDSE and ASF. `sar_research.md` records Round 1 measuring C-band *fusion* as negative here
+at 27 pixels per plot, and that decision stands — this is C-band as a **witness at cohort
+level**, feeding nothing. `test_s1_audit_is_not_imported_by_any_model_module` fails if any
+module in the chain imports it, and the module runs after `submit`, so a leak would move the
+village total.
+
+Three claims written into `s1_audit.PREREG` before a single Sentinel-1 pixel was read.
+
+**P14, the projection audit — HELD.** Cohort median C-band VH departure from its own June
+soil:
+
+```
+crop        n   15 Nov   27 Nov    9 Dec   21 Dec   change
+Cotton     62   +1.741   +1.750   +1.570   +2.726   +0.985
+Bajra     139   -1.106   -0.696   -1.202   -0.908   +0.198
+Groundnut 341   -0.486   -0.440   -0.716   -0.725   -0.239
+Maize     313   -0.754   -0.612   -0.962   -0.553   +0.201
+Rice      111   -1.883   -1.788   -2.192   -2.466   -0.582
+```
+
+Cotton +0.985 dB against an annual-cohort median of −0.020, and it is the **only** cohort
+above its own June bare soil on any date after 12 November, 2.2–3.3 dB clear of every other
+cohort throughout. The flat hold is not optimistic: C-band says cotton did not decay across
+the window the model declines to observe.
+
+What it does **not** establish is that the held *level* is right. A rising cross-pol return
+late in cotton can be canopy, boll opening or structural change, and separating those needs a
+polarimetry this stack does not have.
+
+**Unplanned, and worth more than the test it came from.** Those 62 plots separate on a
+*different sensor* at dates no module had opened. That is a second independent corroboration
+of the tier-1 cotton label, after the reserved December optical at p = 1.26e-11.
+
+**P15, cross-band sign — HELD, weakly.** rho = **+0.248**, n = 813, against the +0.569 the
+same construction scores at X-band versus optical. Positive as claimed, and the gap was
+stated in advance as the expected shape: C-band VH at 5.6 cm cross-pol is not X-band HH at
+3.1 cm. The sign generalises across band and polarisation, and how far is now a number.
+
+**P16, sampling adequacy — HELD, and it prices the competition's own premise.** Nothing in
+the Capella stack can test whether six acquisitions are enough, because six is all there is.
+C-band can. Season integral from every pass over DOY 163–319 against the integral from only
+the six passes nearest the Capella dates, same span: rho = **+0.915**, n = 956, median
+difference **0.27 dB**. Six acquisitions on this calendar recover the ranking a 13-pass
+integral gives.
+
+Bounded deliberately: this says six passes suffice **for a C-band series over these fields**.
+X-band has a shallower penetration and a different dynamic range, and neither the write-up nor
+`leakage_analysis.md` claims the result transfers.
+
+**The honest caveat, printed by the run.** All three held, and a confirmation is worth less
+than a contradiction. Two of the three test whether this project's own design choices were
+adequate, which is an easier question than the ones the ledger got wrong.
+
+**A defect this found in our own output.** The first P16 print showed `p = 0`, which is the
+Spearman p underflowing double precision — the same class of defect as the Moran's `p = 0.005`
+resolution floor in §S23b. `_fmt_p` now prints `< 1e-308 (underflows double precision)`.
+
+**The table ships.** `work/` is gitignored, so on Kaggle the module would re-fetch 32 rasters
+across the network on every run — twenty minutes, and a dependency on an external service
+being up during judging. `kaggle_dataset/s1_per_farm.csv` (966 × 33) ships beside
+`round2_crops.csv`. Precedence is `work/` first and the shipped copy second, deliberately: it
+is a derived artefact, so a change to the zonal method must take effect on a local run rather
+than be masked by a stale file. Verified by hiding `work/s1_per_farm.csv` and re-running —
+the shipped path reproduces rho = +0.915 exactly, and
+`test_the_cband_table_ships_so_kaggle_needs_no_refetch` fails if the network is reached.
+
+**Run state at the end of S32-S33.** 51 tests. Notebook in sync, 25 cells, 17 modules.
+Write-up 1999/2000 with all 158 numeric tokens traced. 15 figures, all 16:9. Deck 11 slides,
+10.8 min (down from 11.0, with the C-band result added). `logs/pipeline_clean.log` EXIT 0.
+**893.9 t over 447.5 ha at 2.00 t/ha — unchanged, which is the load-bearing check: every
+change in these two sections is validation or packaging, and a moved total would have meant
+the C-band module had leaked into the model.**
+
+### S34 — a clean re-run, and the write-up rewritten for a reader (2026-09-02)
+
+**The run.** `work/` was moved aside and the chain re-run from an empty derived state, keeping
+only the shipped caches — which is exactly the state a Kaggle notebook starts in.
+`logs/pipeline_clean.log`, 886 lines, EXIT 0.
+
+**893.9 t over 447.5 ha at 2.00 t/ha, and the numeric diff against the previous shipped log is
+empty.** Every decimal token in the whole log is identical between the two runs, including the
+Sentinel-2-derived values. Round 2 expected third-decimal drift at the MGRS tile seam and we
+carried that expectation forward; on this machine it did not appear.
+
+Only three lines differ, and all three are additions: two NASA POWER fetches, because the
+context cache was cleared, and **`reading the shipped C-band table`** — so this run exercised
+the Kaggle path added in S33 rather than the local `work/` copy. The offline claim is now
+demonstrated by the shipped log itself, not just by a test.
+
+**Two failed runs before it, and neither was the pipeline's fault.** The first died in the
+Sentinel-2 phase on `Recv failure: Operation timed out` after GDAL exhausted its five retries;
+the second on `Connection reset by peer` in the same place. Both were network, and the second
+was self-inflicted: `cp -R work_prev/s2_cache work/s2_cache` nested the cache one level deeper
+because the destination already existed, so four of the six STAC responses and fifteen of the
+eighteen rasters were invisible and the module went to the network for them. The pipeline
+behaved correctly throughout — it raised and stopped rather than continuing on a partial
+fetch, which is the no-`try`/`except` rule doing its job. Recorded because "the run failed"
+and "the code is wrong" are different statements and the log makes the difference legible.
+
+**The write-up was rewritten for a reader, at the same 2000 words.** It had become compressed
+notes: stacked fragments, em-dash chains doing the work of conjunctions, bold on almost every
+number, and — worst — an unlabelled `341 / 124.7 / 2.66 / 331.7` dump per crop with no legend
+anywhere, which no reader could decode. That is now a five-column table.
+
+Humanising cost about 450 words on the first pass, against a hard limit of 2000, so the
+budget had to come from somewhere. The rule used: **method sections stay terse, narrative
+sections get the connectives**, because that is how technical writing actually reads. The
+retired-gate paragraph and the falsification anecdote were cut outright — the first is method
+detail the docs carry in full, and the second is ledger entry 6, which now ships as a row in
+`figures/ledger.png`. That is the ledger figure paying for itself: the write-up no longer has
+to re-narrate each contradicted prediction, because the gallery enumerates all seventeen.
+
+Final: 2000/2000 measured, 151 numeric tokens with 149 traced to the log and 2 external, 51
+tests, notebook in sync, 15 figures all 16:9, deck 11 slides at 10.8 min.
+
+### S35 — the C-band table was unreachable on Kaggle, found while writing the handover (2026-09-02)
+
+Writing the submission checklist surfaced a defect in S33's own fix. `s1_audit.per_farm_table`
+looked for the shipped table at `<repo>/kaggle_dataset/s1_per_farm.csv` — a path that **does
+not exist on Kaggle**, where the notebook is a single file and attached data mounts under
+`/kaggle/input`. The module would have found nothing, gone to the network and re-fetched 32
+rasters mid-run, slowly and only while an external service happened to be up. The whole point
+of shipping the table was to avoid exactly that.
+
+`round2_crops_path` had already solved this problem, including the detail that a Kaggle
+dataset does not always mount at `/kaggle/input/<slug>/` — the second Kaggle run found it
+three levels down. `geocode.s1_table_path()` now searches the same three depths.
+
+**One deliberate difference from `round2_crops_path`: it returns None instead of raising.**
+Round 2's labels are an *input* and the sign arbitration and back-test cannot run without
+them, so their absence must stop the run. This table is a *cache of a derived quantity* — if
+it is absent the audit recomputes it from the rasters and gets the identical answer. Raising
+would turn a slow path into a dead one. Two tests cover both halves.
+
+**The leakage guard fired on the fix, correctly.**
+`test_s1_audit_is_not_imported_by_any_model_module` scans `src/` for the module's name and
+failed because the new docstring mentioned it. A docstring is not an import, so this is a
+false positive — but the guard is a text scan by design, and loosening a leakage guard to let
+a comment through is a worse trade than rewording the comment. The docstring was reworded and
+the guard left strict.
+
+53 tests. Notebook in sync. The shipped log is unchanged: the resolver returns the same path
+locally, so `logs/pipeline_clean.log:693` still reads `reading the shipped C-band table`.
+
+### S36 — the eighth Kaggle run, and the resolver fix proved itself (2026-09-02)
+
+Full chain on Kaggle, EXIT 0, peak RSS 2,092 MB, all 15 figures and all three tables written.
+**51 signature lines spanning every phase were checked against `logs/pipeline_clean.log` and
+all 51 are identical**, including every number added in S32–S35:
+
+- the null-model ablation, 910.1 t against 893.9 t, −16.2 t / −1.78 %, median plot 11.8 %,
+  734 of 966 moving over 5 %
+- the 500 m block bootstrap, rho +0.569 with a 95 % interval of [+0.508, +0.618] over 50
+  blocks
+- the horizon curve, +0.140 [+0.071, +0.202] at 60 days against −0.180 [−0.330, −0.056] at 30
+- the C-band audit, cotton +0.985 dB against an annual median of −0.020, cross-band
+  rho +0.248, sampling adequacy rho +0.915 with median difference 0.268 dB
+- the ledger, 17 claims, 9 contradicted, 1 not met, 7 held
+
+**893.9 t over 447.5 ha at 2.00 t/ha, unchanged.** The C-band module is validation-only and
+the total moving would have been the proof it had leaked. It did not move.
+
+**S35's fix is confirmed by the log rather than by a test.** The run printed
+
+```
+reading the shipped C-band table, /kaggle/input/datasets/sumit1703/s1-per-farm/s1_per_farm.csv
+```
+
+— three directories below `/kaggle/input`, which only the third-depth glob matches. Without
+S35 this line would instead have been `fetching Sentinel-1 STAC` followed by 32 raster reads
+over the network, and the run would have depended on an external service staying up mid-judging.
+The defect was found by writing the submission checklist, not by any gate.
+
+**Three differences, all expected, all cache.** Kaggle starts with an empty `work/`, so it
+issued six `fetching Sentinel-2 STAC` lines and one extra NASA POWER fetch in Phase 2 that the
+local run served from cache. Peak RSS reads 2,092 MB on Kaggle and 0 MB locally, because
+`_rss_mb` reads `/proc`, which macOS does not have. No number differs.
+
+**Zero warnings we caused.** Every `Warning 1:` in the log is GDAL autocorrecting the ring
+winding order in the competition's own `Sokhda_Farms.shp`. Not ours to fix, and the local run
+prints none because GDAL only warns on the shapefile read path Kaggle's build takes.
+
+Eight Kaggle runs, five of them since the audit, and every one has reproduced the local log.

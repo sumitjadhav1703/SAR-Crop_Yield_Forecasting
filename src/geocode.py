@@ -97,6 +97,37 @@ def round2_crops_path() -> str:
           "workspace that has Round 2 beside Round 3.")
 
 
+def s1_table_path() -> str | None:
+    """Locate the shipped Sentinel-1 per-plot table, or None if it is not attached.
+
+    Same candidate order and the same three Kaggle mount depths as `round2_crops_path`,
+    and here for the same reason: the C-band audit module used to look only at
+    `<repo>/kaggle_dataset/`, which does not exist on Kaggle. It would have found nothing,
+    gone to the network, and re-fetched 32 rasters in the middle of a judged run -- slowly,
+    and only while an external service happened to be up.
+
+    (The audit module is deliberately not named anywhere in this file. The leakage test
+    fails on any module in `src/` that names it, and a docstring is not an import -- but the
+    guard is a text scan by design, and weakening a leakage guard to let a comment through
+    is a worse trade than rewording the comment.)
+
+    Returns None rather than raising, and that is the one difference from
+    `round2_crops_path`. The Round 2 labels are an INPUT: without them the sign arbitration
+    and the back-test cannot run, so their absence must stop the run. This table is a CACHE
+    of a derived quantity -- if it is missing, the audit recomputes it from the rasters and
+    gets the identical answer. Raising would turn a slow path into a dead one.
+    """
+    round_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    candidates = [os.environ.get("S1_PER_FARM")]
+    for d in ("*/", "*/*/", "*/*/*/"):
+        candidates += sorted(glob.glob(f"/kaggle/input/{d}s1_per_farm.csv"))
+    candidates.append(os.path.join(round_dir, "kaggle_dataset", "s1_per_farm.csv"))
+    for path in candidates:
+        if path and os.path.isfile(path):
+            return path
+    return None
+
+
 def _data_dir() -> str:
     """Locate the competition data: explicit override, then Kaggle, then the repo.
 
