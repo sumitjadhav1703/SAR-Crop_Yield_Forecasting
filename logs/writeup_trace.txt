@@ -33,7 +33,7 @@
     4.29e-01  2 (allocated)  departure_T6         735     0.0335     0.00231     0.847   4.29e-01
         0.45  same-day T6                            n= 813  rho=+0.454  p=1.32e-42
        0.472  same integral clipped at zero        rho=+0.472  p= 2.47e-46  n=813
-       0.499  B2 cohort mean at T4          813   1.229   1.589  -0.694    -0.310  [-0.499 -0.141]
+       0.474  Bajra      112         0.474         0.647         0.356
        0.508  rho = +0.569 95 % interval [+0.508 +0.618] over 50 blocks
        0.529  overall rho=-0.529 (n=479 p=6.85e-36); expected negative and it is
        0.532  B5 decaying limb (rejected)   813   1.524   1.823  +1.414    -0.409  [-0.532 -0.303]

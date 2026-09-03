@@ -84,7 +84,7 @@ was pre-registered:
 | The long-duration parcels are greener than the population in December **and** in June | **FAILED on June** |
 | (negative control) Plots cleared by 12 Nov are under rabi in December, not bare | **holds** |
 
-Cotton: 0.690 against 0.495–0.532 for the other four, and the only label greener in January
+Cotton: 0.690 against 0.474–0.532 for the other four, and the only label greener in January
 than December. The label is a SAR threshold on 12 November — and, corrected 2026-08-31, that
 threshold's *value* was informed by the October-to-November optical banding
 (`crop_type.py:234-237`, and `docs/leakage_analysis.md`). What the December scene tests is

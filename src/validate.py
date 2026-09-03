@@ -180,7 +180,7 @@ LEDGER = (
      "+0.284 became -0.409 once every predictor was handed the district drift; deleted",
      "contradicted"),
     (10, "S9", "Cotton is the greenest of the five on the reserved 12 December scene",
-     "0.690 against 0.499-0.532, one-sided p = 1.26e-11", "held"),
+     "0.690 against 0.474-0.532, one-sided p = 1.26e-11", "held"),
     (11, "S9", "Plot orientation does not drive t5_anomaly (|rho| < 0.2)",
      "rho = -0.051, p = 0.195, n = 650", "held"),
     (12, "S15", "Re-ranking tier 2 on the signed departure separates the cohorts better "

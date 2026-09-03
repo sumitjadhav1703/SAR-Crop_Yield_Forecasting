@@ -322,7 +322,7 @@ rabi crop; correlating the kharif forecast against it would measure whether a fi
 good field. What they can test is which plots still carry a *kharif* crop after everything
 else has finished — and of the five, cotton alone is picked from October into January.
 
-**Cotton's December NDVI is 0.690 against 0.495–0.532 for the other four, one-sided
+**Cotton's December NDVI is 0.690 against 0.474–0.532 for the other four, one-sided
 p = 1.26e-11, and it is the only label greener in January than in December.** A SAR-only
 label, assigned from a 12 November acquisition before the December scene existed in the
 pipeline, predicted the right plots on a scene it never saw. This is the strongest external

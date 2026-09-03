@@ -125,7 +125,7 @@ readable: tier 2 is an *allocation*, which is what we call it.
 
 **Reserved optical.** We reserved 12 Dec 2025 and 16 Jan 2026 from the first fetch, and an
 assertion fails the run if any module but the validator names them. Cotton's December NDVI is
-**0.690 against 0.499–0.532**, one-sided p = 1.26e-11: a SAR-only label picked the right plots
+**0.690 against 0.474–0.532**, one-sided p = 1.26e-11: a SAR-only label picked the right plots
 on a scene it had never seen, and cleared plots are under rabi rather than bare, so this is
 not measuring "good field".
 

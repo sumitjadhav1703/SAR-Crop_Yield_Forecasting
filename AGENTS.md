@@ -971,6 +971,13 @@ label that is greener in January (0.742) than in December. This is the strongest
 piece of external corroboration in the round: a SAR-only label, assigned before the scene
 existed in the pipeline, predicted the right plots on a scene it never saw.
 
+> **Corrected 2026-09-03, left standing rather than rewritten.** The floor above is wrong. The
+> shipped run prints the other four at Bajra 0.474, Rice 0.502, Maize 0.505, Groundnut 0.532, so
+> the range is **0.474–0.532**. 0.495 was written here when this entry was made and never
+> re-derived after §S15 re-ranked 185 tier-2 labels and moved bajra's December mean. Cotton at
+> 0.690 and p = 1.26e-11 are unchanged. See §S38 for how it survived the write-up tracer, and
+> for the six places it had propagated to.
+
 The negative control matters as much. If cleared plots had been bare in December, then 1a
 would have been measuring "good field" rather than "still-standing cotton". They are not
 bare: cleared plots sit at 0.488 and the population at 0.520, both squarely under a rabi
@@ -2402,3 +2409,152 @@ winding order in the competition's own `Sokhda_Farms.shp`. Not ours to fix, and 
 prints none because GDAL only warns on the shapefile read path Kaggle's build takes.
 
 Eight Kaggle runs, five of them since the audit, and every one has reproduced the local log.
+
+### S37 — the Midnight Check-in PDF, and a browser that will not exit (2026-09-02)
+
+A deliverable outside the Kaggle submission: `Midnight_Checkin_AISEHack_RemoteSensing_Track.docx`
+is a template to fill and mail to the organisers before 2026-09-02 23:30 IST. **PDF only,
+strictly two pages.**
+
+The template was written for a supervised-regression track. It asks for a predicted-versus-
+ground-truth plot, an MAE and an R². **None of the three exists here**, and the check-in says so
+in a validation note rather than substituting a proxy that would look like one. What goes in
+their place is what this project actually measures: leave-future-out skill under a drift control,
+the reserved optical scenes, the block bootstrap, the null ablation and the C-band witness. The
+negative headline is printed as negative.
+
+`checkin/checkin.html` is the document and `checkin/build_checkin.py` renders it. Both are new;
+nothing under `src/`, `outputs/`, `figures/` or `writeup.md` was touched.
+
+**The finding, and it cost most of the session.** There is no pandoc and no wkhtmltopdf on this
+machine, so the renderer is headless Chrome. Chrome **writes the PDF within about five seconds
+and then never exits**, emitting `task_policy_set TASK_CATEGORY_POLICY: (os/kern) invalid
+argument (4)`. Three attempts waited on the process and all three timed out — two minutes, then
+ninety seconds, then two minutes with the sandbox disabled — while the finished file sat on disk
+the whole time. `build_checkin.py` therefore polls for the output file, sleeps one second to let
+the last write flush, and terminates the process rather than waiting on it. The docstring records
+why, because the obvious code is the code that hangs.
+
+**The page count is asserted, not eyeballed**: `len(PdfReader(OUT).pages) != 2` raises. It had to.
+Page 1 overflowed first and was rewritten; then page 2 overflowed through about ten iterations —
+4359, 3212, 1803, 1372, 1224, 1039, 654, 455, 434 and finally 108 spilled characters, the last of
+which was the footer alone. The levers were body type 7.7 → 7.0 pt, leading 1.32 → 1.21, page
+margins, figure width, and deleting whole blocks. Estimating the length was wrong every time;
+only the rendered page count was right. That is Round 2's §UPDATE 21 lesson arriving again in a
+different renderer.
+
+**And once it reached two pages, reading the render found a second defect no gate could.** Page 1
+was about a quarter empty while page 2 was jammed and its figure was too small to read. Nothing
+in the build checks layout balance — the same blind spot as §S30, where a false caption survived
+three clean re-runs because no automated gate looks at a rendered image. Fixed by restoring real
+content to page 1 and enlarging the page-2 figure, then re-trimming; both pages were rasterised
+at 150 dpi with `pdftoppm` and read.
+
+**Two fields are deliberately blank**, printed as ruled lines rather than guessed: the **team
+name** and the **Kaggle notebook URL**. Neither is recorded anywhere in this repository, and a
+plausible-looking invention is worse than a visible gap. CHIRPS is likewise **not** listed among
+the data sources: `grep` finds no reference to it in `src/`, whatever the project instructions
+say.
+
+**Measurement.** `checkin/Midnight_Checkin_Sokhda.pdf`, **2 pages, 523 KB**, page count asserted
+by the builder. `pytest tests/ -q` → **53 passed**, unchanged. Every number in the PDF was
+cross-checked against `logs/pipeline_clean.log`; the headline is unchanged at **893.9 t over
+447.5 ha, 2.00 t/ha**. Not committed and not pushed.
+
+---
+
+### S38 — a master brief for the Goa deck, and a number the tracer waved through (2026-09-03)
+
+`docs/ppt_master_brief.md`. One file holding the why, the what and the how across all three
+rounds, for building the finale presentation from. Round 1's leaderboard history and Round 2's
+method and defects were read out of their own frozen `AGENTS.md` files; **neither round was
+modified**, and every number taken from them carries a `FILE:LINE` citation into the frozen log
+rather than being restated from memory.
+
+The brief is a superset of `build_deck.py`'s eleven slides, not a replacement: Part A is the
+reference, Part B reproduces the built slides' titles, kickers and speaker notes verbatim and
+adds three candidate slides the deck does not carry — `ledger.png`, `uncertainty_budget.png` and
+an origin slide covering Rounds 1 and 2. The first two are figures this project already ships and
+the deck has never used, and §14 of the judge report names the ledger's burial as blind spot 9.
+
+**Round 1 is presented as Round 1's own log presents it.** Its final leaderboard score of 60.757
+came from probe algebra, not from remote sensing, and its log says so plainly: the sweep *"carries
+zero remote-sensing information and zero generalization value"* and NB26_percrop at 1132.987
+*"remains the substantive contribution."* The brief says the same, and says why leading a Goa
+slide with the rank is a bad idea. What Round 1 contributes to this round is the physical ceiling
+it established, which is load-bearing three times over in Round 3.
+
+**The finding.** Cross-checking the brief against `logs/pipeline_clean.log` turned up a live
+instance of the §S18 defect class. Six places — `writeup.md:128`, `build_deck.py:206` and `:214`,
+`src/validate.py:183`, `docs/validation_strategy.md:87`, `docs/research_log.md:325`, and
+`docs/judge_report.md:147` quoting them — state the reserved December test as *"cotton 0.690
+against 0.499–0.532"* (or 0.495–0.532). **The shipped run prints the other four cohorts at Bajra
+0.474, Rice 0.502, Maize 0.505, Groundnut 0.532.** The floor is 0.474.
+
+`logs/writeup_trace.txt:36` shows how 0.499 passed the auditor: it matched a substring of a
+back-test confidence interval, `[-0.499 -0.141]` on the B2 row. That is the same coincidental
+match §S18 caught once already, in a document the tracer was written to protect.
+
+The likely origin is benign and the claim is unaffected — cotton at 0.690 is still the highest by
+a wide margin, and `p = 1.26e-11` is unchanged. Cohort membership moved when 185 tier-2 labels
+were re-ranked in §S15, bajra's December mean moved with it, and the prose was never re-derived.
+But the floor quoted beside the claim is not a number this run prints, and one of the six places
+it appears is the pre-registered ledger string. **It is left standing here rather than edited**,
+per the rule this project applies to every pre-registered string: the correction is recorded, the
+original is not rewritten to agree with it. The brief lists it first among the drift items, with
+the trace line quoted.
+
+**Also recorded as drift, none of it changing a result:** `AGENTS.md:13` still says *"Eight of
+thirteen pre-registered claims were contradicted"*, a count from before §S32 and §S33 added claims
+14 through 17 — `README.md`, `docs/research_log.md`, `figures/ledger.png` and the shipped run all
+say nine of seventeen, and all four are right. `README.md:84` says this log runs to S33; it runs
+to S38. `README.md` says 50 tests and `docs/submission.md` says 37; `pytest` collects 53.
+
+**Measurement.** `docs/ppt_master_brief.md`, **1685 lines, ~17,500 words**. Thirty-six quoted
+Round 3 figures were checked against `logs/pipeline_clean.log` by grep; thirty-four matched, and
+the two that did not are the 0.0015 t rounding discrepancy (a historical figure from §S10, now
+cited to `docs/submission.md:97` rather than to the log) and T5's 108.42 m co-registration
+failure (cited to §S1). `pytest tests/ -q` → **53 passed**; no code was touched. The headline is
+unchanged at **893.9 t over 447.5 ha, 2.00 t/ha**. `Sokhda_Goa_Finals.pptx` is **not** rebuilt —
+the brief says what to change and leaves the decision.
+
+#### S38a — the floor corrected at every site (2026-09-03)
+
+The number is fixed. Cotton's reserved-December result now reads **0.690 against 0.474–0.532**
+everywhere it is claimed, which is what the shipped run prints: Bajra 0.474, Rice 0.502, Maize
+0.505, Groundnut 0.532. Cotton at 0.690 and the one-sided p = 1.26e-11 never moved.
+
+**Whether the ledger entry could be edited at all** was the only real question, because this
+project's rule is that a pre-registered string is never rewritten to agree with a later
+measurement. It could. `validate.LEDGER` entries are `(n, stage, claim, outcome, verdict)`, and
+the wrong number was in the **outcome** field — what the measurement said — not in the claim.
+Correcting an outcome that misreports its own run is a bug fix; the claim string was not touched
+and neither was the verdict.
+
+Corrected: `src/validate.py` (entry 10), `writeup.md`, `build_deck.py` (kicker and notes),
+`docs/validation_strategy.md`, `docs/research_log.md`, `checkin/checkin.html`.
+
+Regenerated or rebuilt from those sources rather than edited by hand: `figures/ledger.png` from
+`validate.LEDGER`, `sokhda_yield_forecast.ipynb` from `src/`, `Sokhda_Goa_Finals.pptx` from
+`build_deck.py`, and `checkin/Midnight_Checkin_Sokhda.pdf` from the HTML.
+
+**Two files were deliberately not edited.** `docs/judge_report.md` §3.3 quotes the wrong number
+inside an audit snapshot, and §23 of that report says the audit is not rewritten as findings are
+closed — so §3.3 stands and §23 gets a status row instead. §S9 of this log keeps its original
+sentence with the correction recorded beneath it, which is the same treatment §S23a gave the
+`RESERVED_TEST` string.
+
+**Measurement.** `pytest tests/ -q` → **53 passed**. `build_notebook.py --check` → the notebook
+is up to date against `src/`. `audit_writeup.py --trace writeup.md` → 151 distinct numeric
+tokens, **149 traced to a printed line**, 2 external and sourced — and `logs/writeup_trace.txt`
+now traces `0.474` to `Bajra 112 0.474 0.647 0.356`, the reserved-optical table itself, where it
+had traced `0.499` to a back-test confidence interval. The write-up measures **2000 words**
+against a 2000 limit. `ledger.png` re-renders at 2304×1296, still 16:9, and row 10 was read on
+the rendered image rather than grepped — §S30's rule. The deck rebuilds to 11 slides and 1617
+words of notes. The check-in PDF rebuilds to **2 pages, 523 KB**. The forecast is untouched and
+the headline is unchanged at **893.9 t over 447.5 ha, 2.00 t/ha**.
+
+The lesson is the tracer's, not the number's. `audit_writeup.py` matched `0.499` against a
+substring of `[-0.499 -0.141]` and passed it — the same failure §S18 recorded, in the same tool,
+two weeks later. A numeric token that appears inside a bracketed interval should not satisfy a
+claim about a cohort mean, and nothing in the auditor knows the difference.

@@ -203,7 +203,7 @@ principled, gave a favourable headline, and did not survive a control built to b
     dict(
         figure="reserved_optical",
         title="Two scenes nothing upstream was allowed to read",
-        kicker="Cotton's December NDVI 0.690 vs 0.495–0.532, one-sided p = 1.26e-11.",
+        kicker="Cotton's December NDVI 0.690 vs 0.474–0.532, one-sided p = 1.26e-11.",
         notes="""\
 The 12th of December and the 16th of January were reserved from the first fetch, and an
 assertion greps the source tree and fails the run if any module but the validator names them.
@@ -211,7 +211,7 @@ That is a lint, not a proof, and our own audit says so. Both dates sit inside th
 so what they test is which plots still carry a kharif crop after everything else has finished
 -- and cotton alone is picked into January.
 
-Cotton's December NDVI is 0.690 against 0.495 to 0.532. A SAR-only label picked the right
+Cotton's December NDVI is 0.690 against 0.474 to 0.532. A SAR-only label picked the right
 plots on a scene it never saw. The negative control matters as much: cleared plots are under
 rabi, not bare, so this is not soil quality.
 
