@@ -1,110 +1,310 @@
-# Sokhda kharif 2025 — final yield forecast from six Capella X-band passes
+# SAR Crop Yield Forecasting
 
-**ANRF AISEHack 2.0, Round 3.** 966 farm plots, one village (Sokhda, Vadodara district,
-Gujarat), six Capella X-band HH SLC acquisitions from 6 June to 12 November 2025, no ground
-truth and no leaderboard.
+<p align="center">
+  <img src="figures/cover.png" alt="Sokhda crop-yield forecasting overview" width="100%">
+</p>
 
-    Y_final(plot) = Y_ref(crop, kharif 2025-26) × a(season-complete canopy integral)
+**Final kharif yield forecasting from six Capella X-band SAR acquisitions under a no-ground-truth setting**
 
-Shipped answer: **893.9 t over 447.5 ha, 2.00 t/ha area-weighted.**
-
-Because there is no label to fit, **validation is the deliverable**. Start with
-[`writeup.md`](writeup.md) (2000 words) and [`docs/validation_strategy.md`](docs/validation_strategy.md).
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
+[![Remote Sensing](https://img.shields.io/badge/domain-SAR%20%7C%20Remote%20Sensing-green.svg)](#)
+[![ANRF AISEHack 2.0](https://img.shields.io/badge/competition-ANRF%20AISEHack%202.0%20%7C%20Round%203-orange.svg)](https://www.kaggle.com/competitions/anrf-aise-hack-2-0-round-3-sar-crop-yield-forecasting)
+[![Tests Snapshot](https://img.shields.io/badge/tests-53%20passed%20(snapshot)-brightgreen.svg)](#reproducibility--setup)
 
 ---
 
-## What you need
+## Executive Summary & Technical Positioning
 
-**1. The competition data.** It is *not* in this repository — it is 3.2 GB of Competition Data
-and the rules forbid redistributing it. Download it from the competition page:
+This repository contains the Round 3 final submission codebase for **ANRF AISEHack 2.0 (Round 3 — Goa Finale)** hosted by GalaxEye Space Solutions. The task requires plot-level final yield forecasting for Kharif 2025 across Sokhda village (Vadodara district, Gujarat, India), using six Capella X-band HH Synthetic Aperture Radar (SAR) acquisitions spanning 6 June to 12 November 2025.
 
-<https://www.kaggle.com/competitions/anrf-aise-hack-2-0-round-3-sar-crop-yield-forecasting/data>
+### Key Study Parameters & Shipped Forecast
 
-Unpack it so the directory holds the six `CAPELLA_C14_SM_SLC_HH_*` scene folders plus
-`Farm_boundaries_shp/` and `Village_Shp/`, then point the pipeline at it:
+| Parameter / Metric | Value |
+| :--- | :--- |
+| **Study Area** | Sokhda village, Vadodara, Gujarat, India |
+| **Parcel Count** | 966 farm plots (447.5 ha total agricultural area) |
+| **Primary Data Source** | 6 Capella X-band HH Single Look Complex (SLC) scenes |
+| **Acquisition Window** | 6 June 2025 – 12 November 2025 |
+| **Crop Classes (5)** | Rice, Cotton, Maize, Bajra, Groundnut |
+| **Headline Yield Forecast** | **893.9 t** over 447.5 ha (**2.00 t/ha** area-weighted) |
+| **Ground Truth Yield** | **None** (No plot-level yield labels; no competition leaderboard) |
+| **Validation Framework** | Pre-registered ledger, leave-future-out back-test, reserved optical, Sentinel-1 witness |
 
-```sh
-export SAR_DATA_DIR=/path/to/the/unpacked/competition/data
+---
+
+## What This Project Does
+
+In the absence of plot-level ground truth yield labels, standard supervised regression is impossible. Instead, this system uses a physically and phenologically constrained estimation pipeline that scales official seasonal crop reference yields by an observed season-complete SAR canopy integral:
+
+```text
+Y_final(plot) = Y_ref(crop, 2025-26) * a(season canopy integral)
 ```
 
-`geocode._data_dir()` also finds it automatically at `/kaggle/input/...` on Kaggle, or at a
-`Data/` directory beside this one. If none of those resolve it raises and lists every path it
-tried — resolution happens at import, so this fails immediately rather than halfway through a
-run.
+- **Y_ref(crop, 2025-26)**: The state/district official seasonal reference yield derived from published 3rd Advance Estimates.
+- **season canopy integral**: The signed, time-integrated SAR gamma-nought (gamma0) departure relative to the June soil baseline across the six Capella acquisitions.
+- **a(.)**: A bounded cohort-centred scaling function (a(.) in [0.70, 1.30]) that redistributes production among plots of the same crop according to relative canopy accumulation.
 
-**2. Round 2's crop labels.** Three validation steps score against this team's own Round 2
-output — the canopy-sign arbitration, the back-test, and the label-sensitivity term. A copy
-ships at [`kaggle_dataset/round2_crops.csv`](kaggle_dataset/round2_crops.csv) (966 rows;
-`farm_id`, `crop_type`, `crop_confidence`) and is found automatically. It is our own model
-output from a previous round, not competition data. To override:
+---
 
-```sh
-export ROUND2_CROPS=/path/to/round2_crops.csv
+## Technical Challenges & Non-Trivialities
+
+Working with six X-band SLC acquisitions under real-world conditions presents severe physical and geometrical complexities:
+
+1. **Reversed Geometry on Pass T5 (10 September 2025)**: T5 was acquired with right-looking geometry, whereas T1–T4 and T6 were left-looking. At 1 m spatial resolution, phase correlation failed (108 m shift) because shadow and layover reversed sides. A two-scale search was implemented to achieve co-registration down to 0.06–1.48 m.
+2. **Radiometric Offsets & Precipitation**: Pass T5 occurred at 01:37 IST following 63.1 mm of rainfall over 3 days. T6 exhibited a global +4.28 dB sensor offset across invariant targets. T6 was corrected radiometrically, while T5 baseline level was withheld from the canopy integral and replaced by T4–T6 interpolation due to soil moisture wetting anomalies.
+3. **Canopy Sign Arbitration**: Physical intuition suggested X-band backscatter attenuates with canopy volume (negative departure). However, same-day Sentinel-2 optical comparisons (13 Oct and 12 Nov) proved that greening correlates positively with SAR backscatter (+1 sign across all 5 crops, rho = +0.569, p = 8.1e-71). The pipeline was modified to enforce +1 signed departures.
+4. **Cotton Season Extrapolation**: Cotton growth cycle extends into January 2026, outrunning the last Capella observation (12 November 2025). The model applies a flat canopy continuation rule past 12 November, carrying 56% of cotton canopy-days.
+
+---
+
+## End-to-End Pipeline Architecture
+
+The execution flow (enforced by `src/pipeline.py`) follows 14 strict processing stages:
+
+```text
+Capella SLC Ingest ──► Geocoding & Calibration ──► Blocking Quality Gates ──► Scene Diagnostics
+                                                                                   │
+Crop Yield Forecast ◄── Phenology & Sign ◄── Sentinel-2 Arbitration ◄── Farm Feature Extraction
+        │
+        ├──► Leave-Future-Out Back-Test
+        ├──► Reserved Optical Check (Dec 25 / Jan 26)
+        ├──► Sentinel-1 C-band Audit (16 passes, validation-only)
+        └──► Output Aggregation (Farm, Village, Zone summaries & Figures)
 ```
 
-**3. Python 3.11+ and GDAL.** See [`requirements.txt`](requirements.txt) — GDAL needs the
-system library installed first and cannot come from pip alone.
+<p align="center">
+  <img src="figures/model_chain.png" alt="End-to-end model pipeline architecture" width="90%">
+  <br>
+  <em>Figure 1: Full pipeline execution chain from Capella SLC processing to validation and output generation.</em>
+</p>
 
-```sh
-python -m venv .venv && . .venv/bin/activate
+> **Note on Independent Witness**: Sentinel-1 C-band data is strictly a validation-only witness (`src/s1_audit.py`). It does NOT supply features, labels, or inputs to the forecast model.
+
+---
+
+## Pre-Registration & Falsification Ledger
+
+To ensure scientific integrity, **17 hypotheses were pre-registered** in code before unblinding test data. When empirical evidence contradicted a hypothesis, the contradiction was recorded in the ledger rather than quietly erased.
+
+- **Pre-registered Ledger Summary**: **7 Held**, **9 Contradicted**, **1 Not Met** (Tier-1 area coverage threshold).
+
+<p align="center">
+  <img src="figures/ledger.png" alt="Pre-registration hypothesis ledger" width="90%">
+  <br>
+  <em>Figure 2: Pre-registration ledger displaying pre-committed claims and empirical outcomes.</em>
+</p>
+
+Key falsification examples:
+- **Hypothesis P4 (Canopy Sign)**: Expected negative SAR backscatter response for 4/5 crops. *Contradicted*: Optical arbitration showed positive backscatter correlation across all crops (+1). Pipeline updated accordingly.
+- **Hypothesis P5 (Decaying Extrapolation)**: Proposed exponential decay projection for cotton after 12 November. *Contradicted*: Decaying projection failed against persistence in drift-aware back-testing. Pipeline updated to flat hold.
+
+---
+
+## Validation Strategy & Key Results
+
+Validation is the core deliverable of this project. The methodology incorporates multiple independent verification layers:
+
+### 1. Headline Leave-Future-Out Back-Test
+Models were trained on passes T1–T4 to forecast withheld pass T6 (12 November 2025) using Round 2 crop labels:
+- **30-Day Withheld Horizon (Flat-Hold Rule)**: rho = -0.119 [-0.280, +0.022]
+- **60-Day Withheld Horizon**: rho = +0.140 [+0.071, +0.202]
+
+> **Honest Assessment**: The shipped projection rule does **not** beat persistence at the headline 30-day horizon (-0.119). It fails where harvest events occurred mid-window, but recovers skill at 60 days (+0.140).
+
+<p align="center">
+  <img src="figures/backtest.png" alt="Leave-future-out back-test performance" width="85%">
+  <br>
+  <em>Figure 3: Back-test validation showing performance against persistence across withheld temporal horizons.</em>
+</p>
+
+### 2. Reserved Optical Validation (Sentinel-2)
+Two post-Kharif Sentinel-2 scenes (12 December 2025 and 16 January 2026) were reserved strictly for validation (`validate.assert_reserved_unread()` enforces zero upstream access):
+- Cotton December NDVI was **0.690** compared to **0.474–0.532** for harvested crops (one-sided p = 1.26e-11).
+- Proves SAR-only classification correctly identified standing long-duration cotton on unblinded future optical imagery.
+
+<p align="center">
+  <img src="figures/reserved_optical.png" alt="Reserved optical Sentinel-2 validation" width="85%">
+  <br>
+  <em>Figure 4: Reserved optical NDVI distributions validating late-season standing cotton.</em>
+</p>
+
+### 3. Independent Sentinel-1 C-Band Audit
+16 Sentinel-1 IW RTC passes (12 June – 21 December 2025) were analyzed independently:
+- Cotton backscatter remained **+0.985 dB** above its June bare-soil baseline through 21 December, confirming that holding cotton canopy flat past 12 November is physically realistic.
+- Six-pass Capella temporal integral correlated at rho = +0.915 against a dense 13-pass C-band integral, validating acquisition sampling density.
+
+### 4. Spatial Coherence & Confound Controls
+- **Moran Spatial Autocorrelation**: Within-crop residual yield exhibits significant spatial structure (I = +0.151, p < 0.001, 999-permutation test).
+- **Look-Direction Control**: Parcel row azimuth vs. T5 anomaly showed no look-direction bias (rho = -0.051, p = 0.195).
+
+---
+
+## Kharif 2025 Crop-Wise Forecast Results
+
+Village-level production totals sum exactly to the farm-level output file (`outputs/farm_forecast.csv`), rounded once prior to aggregation:
+
+| Crop Class | Farm Plots | Area (ha) | Area Share | Yield (t/ha) | Production (t) | 10th–90th %ile (t/ha) |
+| :--- | ---: | ---: | ---: | ---: | ---: | :--- |
+| **Groundnut** | 341 | 124.7 | 27.9% | 2.66 | 331.7 | 2.19 – 3.47 |
+| **Maize** | 313 | 139.6 | 31.2% | 1.96 | 273.7 | 1.50 – 2.50 |
+| **Rice** | 111 | 76.0 | 17.0% | 1.69 | 128.2 | 1.24 – 2.11 |
+| **Bajra** | 139 | 61.8 | 13.8% | 1.40 | 86.6 | 1.20 – 1.64 |
+| **Cotton** | 62 | 45.5 | 10.2% | 1.62 | 73.8 | 1.19 – 1.93 |
+| **Total / Area-Wt** | **966** | **447.5** | **100.0%** | **2.00** | **893.9** | **1.36 – 3.04** |
+
+<p align="center">
+  <img src="figures/yield_forecast_map.png" alt="Sokhda plot-level yield forecast map" width="85%">
+  <br>
+  <em>Figure 5: Plot-level final yield forecast map (t/ha) across Sokhda village.</em>
+</p>
+
+---
+
+## Visual Gallery
+
+<p align="center">
+  <img src="figures/sar_composite.png" alt="Capella X-band SAR temporal composite" width="85%">
+  <br>
+  <em>Figure 6: Multi-temporal Capella X-band SAR false-color composite over Sokhda AOI.</em>
+</p>
+
+<p align="center">
+  <img src="figures/crop_type_map.png" alt="Reconstructed crop type map" width="85%">
+  <br>
+  <em>Figure 7: Reconstructed 5-class crop map across 966 farm parcels.</em>
+</p>
+
+<p align="center">
+  <img src="figures/uncertainty_budget.png" alt="Uncertainty budget breakdown" width="85%">
+  <br>
+  <em>Figure 8: Forecast variance decomposition (External inputs: ±150.9 t vs. Radar modulation: ±9.5 t).</em>
+</p>
+
+---
+
+## Data Sources & Dependencies
+
+### 1. Competition Dataset (Restricted)
+- **Capella X-Band SLC Scenes (6 dates)**: 3.2 GB total.
+- **Vector Polygons**: `Farm_boundaries_shp/` (966 plots) and `Village_Shp/`.
+- **Licensing & Access**: Competition Use Only. **Not redistributed** in this repository. Download directly from [Kaggle ANRF AISEHack 2.0 Round 3](https://www.kaggle.com/competitions/anrf-aise-hack-2-0-round-3-sar-crop-yield-forecasting/data).
+
+### 2. Shipped Derived Tables & Cache
+- `kaggle_dataset/round2_crops.csv`: 966 farm plot crop allocations from Phase 2.
+- `kaggle_dataset/s1_per_farm.csv`: Pre-computed Sentinel-1 backscatter time series for offline audit.
+- `work/s2_cache/`: Cached Sentinel-2 STAC responses for offline execution.
+
+### 3. Contextual External Data
+- **Sentinel-2 L2A**: Optical STAC via MPC / Earth Search (validation and canopy sign arbitration).
+- **Sentinel-1 IW RTC**: C-band 10 m backscatter (validation-only witness).
+- **DA&FW 3rd Advance Estimates**: Official 2025–26 Gujarat crop reference yields.
+
+---
+
+## Reproducibility & Setup
+
+### Requirements & System Setup
+- **Python**: 3.11+
+- **System Dependency (GDAL)**: Required prior to installing Python packages.
+  - Linux (Debian/Ubuntu): `sudo apt-get update && sudo apt-get install -y gdal-bin libgdal-dev python3-gdal`
+  - macOS: `brew install gdal`
+
+### Environment Installation
+Create a virtual environment and install dependencies:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 pip install "gdal==$(gdal-config --version)"
 ```
 
-**4. Network,** for the Sentinel-2 and NASA POWER fetches — on the first run only. Both are
-cached to `work/`, and `work/s2_cache/` holds the STAC search responses as well as the
-rasters, so a second run is fully offline. To run with no network at all and no cache, use
-`--no-s2`: the forecast is unchanged (it consumes no optical data) but every external
-validation is lost, and the run says so.
+### Data Path Configuration
+Set the path to the unpacked competition data directory:
 
-## Run it
-
-```sh
-python src/pipeline.py                    # full chain, ~15 min, writes outputs/ and figures/
-python src/pipeline.py --no-s2            # no network; forecast only, no external validation
-python -m pytest tests/ -q                # 50 tests
-python build_notebook.py --check          # verify the notebook matches src/
-python audit_writeup.py --trace writeup.md   # every number traced to the shipped log
+```bash
+export SAR_DATA_DIR=/path/to/unpacked/competition_data
 ```
 
-The tests import `geocode` and `farm_features`, which resolve the data at import time, so they
-need `SAR_DATA_DIR` set too.
+### Execution Commands
 
-## What is here
+```bash
+# Run full pipeline (~15 min; requires network for optical cache on first run)
+python src/pipeline.py
 
+# Run offline mode (skips optical network calls; retains yield forecast)
+python src/pipeline.py --no-s2
+
+# Run test suite
+python -m pytest tests/ -q
+
+# Check notebook synchronization
+python build_notebook.py --check
+
+# Trace writeup statistics against execution logs
+python audit_writeup.py --trace writeup.md
 ```
-src/                 the pipeline. 16 modules, executed in the order listed in pipeline.py
-tests/               50 tests, each one a defect that actually happened
-docs/                methodology, validation strategy, leakage analysis, research log
-kaggle_dataset/      round2_crops.csv and s1_per_farm.csv, both found automatically
-outputs/             the three shipped tables: farm, village, zone
-figures/             the 15-figure gallery, including the pre-registration ledger
-logs/pipeline_clean.log   the shipped run every number in the write-up is traced to
-writeup.md           the 2000-word submission
-AGENTS.md            the full development log, S0-S33. Long, and not required reading
-docs/judge_report.md an adversarial audit of this submission, including its own defects
-sokhda_yield_forecast.ipynb   GENERATED from src/ by build_notebook.py — never edit directly
+
+> **Data Limitation Note**: Executing `src/pipeline.py` or running the full test suite requires downloading the 3.2 GB Capella dataset from Kaggle and setting `SAR_DATA_DIR`.
+
+---
+
+## Repository Structure
+
+```text
+.
+├── src/                  # Core pipeline processing modules (16 files)
+│   ├── pipeline.py       # Main orchestration script
+│   ├── geocode.py        # Capella SLC calibration & RPC geocoding
+│   ├── coreg_calib.py    # Two-scale co-registration & radiometric normalisation
+│   ├── farm_features.py  # Zonal statistics extraction over 966 plots
+│   ├── phenology.py     # Signed canopy integration & growth tracking
+│   ├── crop_type.py      # Tier 1/2 crop classification logic
+│   ├── yield_forecast.py # Reference yield scaling & uncertainty bounds
+│   ├── validate.py       # Back-testing & pre-registered hypothesis ledger
+│   └── s1_audit.py       # Independent Sentinel-1 C-band audit
+├── tests/                # Regression & unit tests (test_pipeline.py)
+├── docs/                 # Detailed methodology & scientific documentation
+│   ├── model_architecture.md
+│   ├── validation_strategy.md
+│   ├── leakage_analysis.md
+│   ├── research_log.md
+│   └── judge_report.md
+├── figures/              # Shipped visual evidence gallery (15 PNGs)
+├── outputs/              # Shipped forecast CSVs (farm, village, zone summaries)
+├── kaggle_dataset/       # Shipped non-sensitive derived CSV tables
+├── logs/                 # Clean execution logs (pipeline_clean.log)
+├── writeup.md            # Final 2,000-word submission write-up
+├── sokhda_yield_forecast.ipynb # Notebook auto-generated from src/
+└── requirements.txt      # Python dependency manifest
 ```
 
-`src/*.py` is the source of truth. The Kaggle notebook is generated from it, so a module and
-the notebook cannot disagree; if they ever do, re-run `build_notebook.py`.
+---
 
-## Reading it critically
+## Documentation Deep Dive
 
-Every number in `writeup.md` is printed by the run in `logs/pipeline_clean.log`, and
-`audit_writeup.py --trace` writes the token-to-log-line mapping to `logs/writeup_trace.txt`.
+For detailed technical derivations and logs, refer to the relative links below:
 
-Seventeen claims were written down before the data that could test them was opened; **nine
-were contradicted** and the model or the claim was changed to match. The ledger lives in the
-source as `validate.LEDGER`, is printed by every run, and is drawn as `figures/ledger.png`;
-the narrative is at the top of [`docs/research_log.md`](docs/research_log.md). [`docs/judge_report.md`](docs/judge_report.md)
-is a hostile audit of this submission that found further defects — two false claims in our own
-leakage analysis, a p-value that was a resolution floor, and a default argument that had
-silently invalidated one of the pre-registered tests. All are corrected in place and
-recorded rather than quietly removed; §23 of that report tracks what is closed and what is not.
+- [Methodology & Model Architecture](docs/model_architecture.md)
+- [Validation Strategy & Statistical Tests](docs/validation_strategy.md)
+- [Leakage Analysis & Audit Findings](docs/leakage_analysis.md)
+- [Research & Experimentation Log](docs/research_log.md)
+- [Adversarial Self-Audit & Judge Report](docs/judge_report.md)
+- [Competition Framework Notes](docs/competition.md)
+- [Submission Package Notes](docs/submission.md)
 
-## Data licence
+---
 
-The competition data is **Competition Use only** and is not redistributed here. External data
-used — Sentinel-2 L2A via Earth Search, NASA POWER, DA&FW advance estimates — is public and free
-to all participants, as the rules require. Sources are listed in `docs/research_log.md`.
+## Key Limitations
+
+1. **No True Yield Ground Truth**: Model level is anchored to official state reference statistics (Y_ref); radar data modulates plot distribution rather than setting absolute scale.
+2. **Back-Test Performance**: The 30-day withheld back-test (rho = -0.119) does not outperform persistence, reflecting challenges in predicting harvest timing from sparse temporal samples.
+3. **Limited SAR Temporal Stack**: 6 Capella observations leave multi-week gap windows (e.g., 60-day gap between September and November).
+4. **Sub-optimal Tier-2 Labels**: Tier-2 crop assignments rely on district crop mix allocation rather than direct SAR physical boundary separation.
+5. **Plot Coverage**: 153 of 966 plots were incomplete across all six acquisitions (82 temporally interpolated, 71 spatially imputed).
+
+---
+
+## License Notice
+
+No formal open-source license file is currently included in this repository. The competition SAR dataset remains subject to GalaxEye Space Solutions / Kaggle ANRF AISEHack 2.0 Competition Use terms.
